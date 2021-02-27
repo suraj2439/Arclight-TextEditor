@@ -1,0 +1,22 @@
+
+ctrl + R_arr	: end of current line
+ctrl + L_arr	: start of current line
+ctrl + U_arr	: start line of window
+ctrl + D_arr	: end line of window
+ctrl + p	: insert "printf("");" at current position with pointer inside quote
+ctrl + s	: insert "scanf("");" at current position with pointer inside quote	// decide between save and scanf
+ctrl + ;	: insert ";" at end of line
+ctrl + i/#	: insert "#include < >" 
+ctrl + m	: insert main loop
+ctrl + d	: insert "#define "
+ctrl + f/other	: insert #ifndef,  #define, #endif 
+		: insert brackets with pair
+ctrl + r	: insert "return"
+ctrl + f/other	: insert for loop
+ctrl + w	: insert while loop
+		: hilight keywords
+		: adjust tabs
+		: insert struct { }
+		: insert malloc(sizeof()), realloc, calloc, xalloc, etc
+		: insert sizeof()
+
