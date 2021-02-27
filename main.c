@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <ncurses.h>
 
 #define MAX_CHAR_IN_SUBLINE	5
 #define MAX_CHAR 		-128
@@ -19,6 +20,7 @@ typedef struct line {
  * contain pointer of correspondig line */
 typedef struct node_l { 
 	line line;
+	int line_size;
 } node_l;
 
 
@@ -116,7 +118,15 @@ line* move_cursor(line *subline, int position) {
 }
 
 
+void print_loc(int x, int y) {
+        move(20, 20);
+        mvprintw(10, 30, "x: %d y: %d", x, y);
+}
+
+
+
 // Function to insert character at position
+// NOTE: line_size should be modified by caller of this function it is not modified in this fun
 void insert_at_pos(line *subline, int position, char data) {
 	// move the cursor at appropriate position
 	line *lne = move_cursor(subline, position);
@@ -164,10 +174,14 @@ void del_from_pos(win *w, int line_no, int position) {
 	int end = w->tot_lines - w->head_indx - 1;
 
 	line *lne;
+	int l_no;
 	if(line_no <= end)
-		lne = &((w->head)[line_no].line);
+		l_no = line_no;
 	else
-		lne = &((w->head)[line_no - w->tot_lines].line);
+		l_no = line_no - w->tot_lines;
+
+	lne = &((w->head)[l_no].line);
+	(w->head)[l_no].line_size--;		// decrease line size
 
 	//line *lne = (line_no <= end) ? &(w->head[line_no].line) : &(w->head[line_no - w->tot_lines]);
 	line *prev_lne = NULL;
@@ -228,6 +242,7 @@ void init_window(win *w, int tot_lines) {
 		(w->head)[i].line.curr_line = (char*)malloc(sizeof(char) * MAX_CHAR_IN_SUBLINE);
 		// init next subline pointer with NULL
 		(w->head)[i].line.rem_line = NULL;
+		(w->head)[i].line_size = 0;
 		init_gap_buff(&(w->head[i]).line);
 	}
 	return;
@@ -251,9 +266,11 @@ FILE* load_file(win *w, char *filename) {
                 	return fd_get;
         	}
         	insert_at_pos(lne, indx++, c);
-        	
+
 		while((c = fgetc(fd_get)) != '\n')
                 	insert_at_pos(lne, indx++, c);
+		
+		(w->head)[i].line_size = indx;	// size of total line
 	}
 
 	return fd_get;	
@@ -261,9 +278,9 @@ FILE* load_file(win *w, char *filename) {
 
 
 /*use to print contents of ADT - for testing*/
-void print(win w) {
+void print_page(win w) {
 	line *lne;
-	int h_indx;
+	int h_indx, line_no;
 	for(int i = 0; i < w.tot_lines; i++) {
 		h_indx = i;
 		// circular array
@@ -277,12 +294,16 @@ void print(win w) {
 		if(lne->curr_line[0] == MAX_CHAR)
                         return;
 
+		// to clear previously written line from screen
+		move(i, 0);
+                clrtoeol();
+		int col = 0;
                 while(1) {
                         if(lne->gap_size != 0 && indx == lne->gap_left)
 				indx = lne->gap_right + 1;
 			if(indx == MAX_CHAR_IN_SUBLINE) {
 				if(lne->rem_line == NULL) {
-					printf("\n");
+					// new line
 					break;
 				}
                                 lne = lne->rem_line;
@@ -290,10 +311,47 @@ void print(win w) {
                         }
 			
 			c = lne->curr_line[indx++];
-			printf("%c", c);
+			mvaddch(i, col++, c);
                 }
         }
 	return;
+}
+
+
+
+void print(win w) {
+        line *lne;
+        int h_indx;
+        for(int i = 0; i < w.tot_lines; i++) {
+                h_indx = i;
+                // circular array
+                if(h_indx + w.head_indx >= w.tot_lines)
+                        h_indx = h_indx - w.tot_lines;
+
+                lne = &((w.head)[h_indx].line);
+                char c = 1;
+                int indx = 0;
+
+                if(lne->curr_line[0] == MAX_CHAR)
+                        return;
+
+                while(1) {
+                        if(lne->gap_size != 0 && indx == lne->gap_left)
+                                indx = lne->gap_right + 1;
+                        if(indx == MAX_CHAR_IN_SUBLINE) {
+                                if(lne->rem_line == NULL) {
+                                        printf("\n");
+                                        break;
+                                }
+                                lne = lne->rem_line;
+                                indx = 0;
+                        }
+
+                        c = lne->curr_line[indx++];
+                        printf("%c", c);
+                }
+        }
+        return;
 }
 
 
@@ -358,13 +416,24 @@ void extract_line(node_l *tmp, FILE *fd_store) {
  * fd_get   : file descripter to pointing in main file.
  * */
 void load_next_line(win *w, FILE *fd_store_prev, FILE *fd_store_next, FILE *fd_main) {	
+	char ch;
+	int extract_from_next = 0;
+	if(fseek(fd_store_next, -1, SEEK_CUR) != -1) {
+		fseek(fd_store_next, 1, SEEK_CUR);
+		extract_from_next = 1;
+	}
+	else if((ch = fgetc(fd_main)) == -1) {
+		// next line not available
+		return;
+	}
+
 	/*extract first line of window from ADT to tmp file*/
         if(w->head->line.curr_line[0] != MAX_CHAR)
                 extract_line(w->head, fd_store_prev);
 	else return;
 
 	// free mallocated sublines corresponding to data_line in ADT
-	free_line(&w->head->line);
+	free_line(&w->head->line);	//TODO: try to do without free
 
 	// init new line at head
 	w->head->line.curr_line = (char*)malloc(sizeof(char) * MAX_CHAR_IN_SUBLINE);
@@ -376,34 +445,42 @@ void load_next_line(win *w, FILE *fd_store_prev, FILE *fd_store_next, FILE *fd_m
 	line *lne = &(w->head)->line;
 	char c;
 
-	// if temp file in which next data is stored, has data extract from there, 
-	for(int i=0; ; i++) {
-                if(fseek(fd_store_next, -2, SEEK_CUR) == -1) {
-                        if(fseek(fd_store_next, -1, SEEK_CUR) == -1)
-                                break;
-			return;
-                }
-                c = fgetc(fd_store_next);
-                if(c != '\n')
-			insert_at_pos(lne, 0, c);
-		else return;
-        }
+	if(extract_from_next) {
+		// if temp file in which next data is stored, has data extract from there, 
+		w->head->line_size = 0;
+		for(int i=0; ; i++) {
+        	        if(fseek(fd_store_next, -2, SEEK_CUR) == -1) {
+				// 
+				fseek(fd_store_next, -1, SEEK_CUR);	// goto start position
+				break;
+	                }
+	                c = fgetc(fd_store_next);
+        	        if(c != '\n') {
+				// insert at position 0 because data is extracted in reverse passion
+				insert_at_pos(lne, 0, c);
+				w->head->line_size++;
+			}
+			else break;
+	        }
+	}
 
 	// Now if line is not present in filename_nxt.tmp file 
 	// then extract from main file
-	c = fgetc(fd_main);
 	// next line not present
-	if(c == -1) {
-		lne->curr_line[0] = MAX_CHAR;
-		return;
+	else {
+		int indx = 0;
+		if(ch != '\n')
+			insert_at_pos(lne, indx++, ch);
+		
+		while((ch = fgetc(fd_main)) != '\n') {
+			insert_at_pos(lne, indx++, ch);
+		}
+		w->head->line_size = indx;
 	}
-	int indx = 0;
-	insert_at_pos(lne, indx++, c);
-	while((c = fgetc(fd_main)) != '\n')
-		insert_at_pos(lne, indx++, c);
 
 	w->head_indx = (w->head_indx + 1) % w->tot_lines;
-	if(w->head_indx == 0)
+	
+	if(w->head_indx == 0)	// TODO head_indx is sufficient to show circular array
 		w->head -= (w->tot_lines-1);
 	else w->head++;
 
@@ -428,11 +505,11 @@ void load_prev_line(win *w, FILE *fd_store_prev, FILE *fd_store_next) {
 		w->head--;
 	}
 	
-	// extract line(prev) into filename_next.tmp
+	// extract last line into filename_next.tmp
         if(w->head->line.curr_line[0] != MAX_CHAR)
                 extract_line(w->head, fd_store_next);
         // free mallocated sublines corresponding to data_line in ADT
-        free_line(&w->head->line);
+        free_line(&w->head->line);	// TODO: try to do without free
 
 	// init new line at head
         w->head->line.curr_line = (char*)malloc(sizeof(char) * MAX_CHAR_IN_SUBLINE);
@@ -445,15 +522,18 @@ void load_prev_line(win *w, FILE *fd_store_prev, FILE *fd_store_next) {
         char c;
 
         // if temp file in which previous data is stored, has data extract from there,
-        for(int i=0; ; i++) {
+        w->head->line_size = 0;
+	for(int i=0; ; i++) {
                 if(fseek(fd_store_prev, -2, SEEK_CUR) == -1) {
                         if(fseek(fd_store_prev, -1, SEEK_CUR) == -1)	// file is empty
                                 break;
 			else return;
                 }
                 c = fgetc(fd_store_prev);
-                if(c != '\n')
+                if(c != '\n') {
                         insert_at_pos(lne, 0, c);
+			w->head->line_size++;
+		}
                 else return;
         }
 }
@@ -588,6 +668,17 @@ void insert_new_line_at_pos(win *w, int line_no, int position, FILE *fd_prev, FI
 	return;
 }
 
+// use to return head_index
+int head_index(win w, int line_no) {	//TODO: use in print fun
+	 int h_indx = line_no;
+	 // circular array
+	 if(h_indx + w.head_indx >= w.tot_lines)
+		 h_indx = h_indx - w.tot_lines;
+	 return h_indx;
+}
+
+
+
 
 int main() {
 	win window_1;
@@ -595,6 +686,110 @@ int main() {
 	init_window(&window_1, 5);
 
 	fd_main = load_file(&window_1,"1.c");
+	fd_store_prev = fopen(".hi_pr.tmp", "w+");
+        fd_store_next = fopen(".hi_nxt.tmp", "w+");
+
+/*	
+	for(int i = 0; i < 1; i++) {
+		load_next_line(&window_1, fd_store_prev, fd_store_next, fd_main);
+		print(window_1);
+		printf("abc %d\n",window_1.head_indx);
+		printf("\n");
+
+		load_prev_line(&window_1, fd_store_prev, fd_store_next);
+                print(window_1);
+		printf("abc %d\n",window_1.head_indx);
+		printf("\n");
+
+		load_next_line(&window_1, fd_store_prev, fd_store_next, fd_main);
+                print(window_1);
+		printf("abc %d\n",window_1.head_indx);
+                printf("\n");
+
+		load_next_line(&window_1, fd_store_prev, fd_store_next, fd_main);
+                print(window_1);
+                printf("abc %d\n",window_1.head_indx);
+                printf("\n");
+
+		load_next_line(&window_1, fd_store_prev, fd_store_next, fd_main);
+                print(window_1);
+                printf("abc %d\n",window_1.head_indx);
+                printf("\n");
+	}
+	exit(1);
+*/	
+	// curses interface 
+        initscr();
+        noecho();
+        keypad(stdscr, true);
+
+	int ch;
+	int line_no = 0, col_no = 0;
+
+	print_page(window_1);
+	print_loc(line_no, col_no);
+	move(line_no, col_no);
+	while(1) {
+		ch = getch();
+		switch(ch) {
+			case 'q':
+				endwin();
+				return 0;
+
+			case KEY_LEFT:
+				if(col_no)
+					col_no--;
+				break;
+
+			case KEY_RIGHT:
+				if(col_no < (window_1.head)[head_index(window_1, line_no)].line_size)
+					col_no++;
+				break;
+
+			case KEY_DOWN:
+				if(line_no < window_1.tot_lines - 1) {
+					line_no++;
+					
+					int h_indx = head_index(window_1, line_no);
+					if(col_no > (window_1.head)[h_indx].line_size)
+						col_no = (window_1.head)[h_indx].line_size;
+				}
+				else {
+					load_next_line(&window_1, fd_store_prev, fd_store_next, fd_main);
+					
+					int h_indx = head_index(window_1, line_no);
+					if(col_no > (window_1.head)[h_indx].line_size)
+						col_no = (window_1.head)[h_indx].line_size;
+				}
+				break;
+
+			case KEY_UP:
+				if(line_no > 0) {
+					line_no--;
+					
+					int h_indx = head_index(window_1, line_no);
+                                        if(col_no > (window_1.head)[h_indx].line_size)
+                                                col_no = (window_1.head)[h_indx].line_size;
+
+				}
+				else {
+					load_prev_line(&window_1, fd_store_prev, fd_store_next);
+
+					int h_indx = head_index(window_1, line_no);
+					if(col_no > (window_1.head)[h_indx].line_size)
+                                                col_no = (window_1.head)[h_indx].line_size;
+				}
+				break;
+
+			case '\n':
+				insert_new_line_at_pos(&window_1, line_no, col_no, fd_store_prev, fd_store_next, fd_main);
+				print_page(window_1);
+				break;
+		}
+		print_page(window_1);
+		print_loc(line_no, col_no);
+		move(line_no, col_no);
+	}
 	/*
 	printf("\n");
 	insert_at_pos(&(window_1.head->line), 2, 'z');
@@ -608,11 +803,11 @@ int main() {
         insert_at_pos(&(window_1.head->line), 5, 'z');
 	*/
 
-	print(window_1);
-	printf("fd\n");
-	del_from_pos(&window_1,0, 1);
-	printf("\n");
-	print(window_1);
+	//print(window_1);
+	//printf("fd\n");
+	//del_from_pos(&window_1,0, 1);
+	//printf("\n");
+	//print(window_1);
 
 	/*
 	fd_store_prev = fopen(".hi_pr.tmp", "w+");

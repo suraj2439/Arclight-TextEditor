@@ -1,2 +1,4 @@
-cc main.c
+cc main.c -lncurses
 ./a.out
+rm a.out
+
