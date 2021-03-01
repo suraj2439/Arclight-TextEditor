@@ -1,0 +1,70 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+MAX_CHAR	main.c	6;"	d	file:
+MAX_CHAR_IN_LINE	1.c	3;"	d	file:
+MAX_CHAR_IN_SUBLINE	main.c	5;"	d	file:
+col_ptr	1.c	/^	int row_ptr, col_ptr;$/;"	m	struct:win	file:
+curr_line	1.c	/^        char *curr_line;$/;"	m	struct:line	file:
+curr_line	main.c	/^        char *curr_line;$/;"	m	struct:line	file:
+del_from_pos	main.c	/^void del_from_pos(win *w, int line_no, int position) {$/;"	f
+extract_line	main.c	/^void extract_line(node_l *tmp, FILE *fd_store) {$/;"	f
+free_line	main.c	/^void free_line(line* lne) {$/;"	f
+free_rem_lines	1.c	/^void free_rem_lines(line* lne) {$/;"	f
+gap_left	main.c	/^	int gap_left, gap_right;$/;"	m	struct:line	file:
+gap_right	main.c	/^	int gap_left, gap_right;$/;"	m	struct:line	file:
+gap_size	main.c	/^	int gap_size;$/;"	m	struct:line	file:
+head	1.c	/^	node_l *head;$/;"	m	struct:win	file:
+head	main.c	/^	node_l *head;$/;"	m	struct:win	file:
+head_index	main.c	/^int head_index(win w, int line_no) {	\/\/TODO: use in print fun$/;"	f
+head_indx	main.c	/^	int tot_lines, head_indx;$/;"	m	struct:win	file:
+init_gap_buff	main.c	/^void init_gap_buff(line *lne) {$/;"	f
+init_line	1.c	/^line init_line() {$/;"	f
+init_window	1.c	/^void init_window(win *w, int tot_lines) {$/;"	f
+init_window	main.c	/^void init_window(win *w, int tot_lines) {$/;"	f
+insertBegin	1.c	/^void insertBegin(node_l** start, line line) {$/;"	f
+insert_at_pos	main.c	/^void insert_at_pos(line *subline, int position, char data) {$/;"	f
+insert_new_line_at_pos	main.c	/^void insert_new_line_at_pos(win *w, int line_no, int position, FILE *fd_prev, FILE *fd_nxt, FILE *fd_main) {$/;"	f
+line	1.c	/^	line line;$/;"	m	struct:node_l	file:
+line	1.c	/^typedef struct line {$/;"	s	file:
+line	1.c	/^} line;$/;"	t	typeref:struct:line	file:
+line	main.c	/^	line line;$/;"	m	struct:node_l	file:
+line	main.c	/^typedef struct line {$/;"	s	file:
+line	main.c	/^} line;$/;"	t	typeref:struct:line	file:
+line_size	main.c	/^	int line_size;$/;"	m	struct:node_l	file:
+load_file	1.c	/^FILE* load_file(win *w, char *filename) {$/;"	f
+load_file	main.c	/^FILE* load_file(win *w, char *filename) {$/;"	f
+load_next_line	1.c	/^void load_next_line(win *w, FILE *fdd) {$/;"	f
+load_next_line	main.c	/^void load_next_line(win *w, FILE *fd_store_prev, FILE *fd_store_next, FILE *fd_main) {	$/;"	f
+load_prev_line	main.c	/^void load_prev_line(win *w, FILE *fd_store_prev, FILE *fd_store_next) {$/;"	f
+main	1.c	/^int main() {$/;"	f
+main	main.c	/^int main() {$/;"	f
+move_cursor	main.c	/^line* move_cursor(line *subline, int position) {$/;"	f
+move_gap_left	main.c	/^void move_gap_left(line *lne, int position) {$/;"	f
+move_gap_right	main.c	/^void move_gap_right(line *lne, int position) {$/;"	f
+next	1.c	/^	struct node_l* next;$/;"	m	struct:node_l	typeref:struct:node_l::node_l	file:
+next_buff	1.c	/^	struct win *next_buff, *prev_buff;$/;"	m	struct:win	typeref:struct:win::win	file:
+next_buff_load_rem	1.c	/^	int next_buff_load_rem, prev_buff_load_rem;$/;"	m	struct:win	file:
+node_l	1.c	/^typedef struct node_l { $/;"	s	file:
+node_l	1.c	/^} node_l;$/;"	t	typeref:struct:node_l	file:
+node_l	main.c	/^typedef struct node_l { $/;"	s	file:
+node_l	main.c	/^} node_l;$/;"	t	typeref:struct:node_l	file:
+prev	1.c	/^	struct node_l* prev;$/;"	m	struct:node_l	typeref:struct:node_l::node_l	file:
+prev_buff	1.c	/^	struct win *next_buff, *prev_buff;$/;"	m	struct:win	typeref:struct:win::	file:
+prev_buff_load_rem	1.c	/^	int next_buff_load_rem, prev_buff_load_rem;$/;"	m	struct:win	file:
+print	1.c	/^void print(win w) {$/;"	f
+print	main.c	/^void print(win w) {$/;"	f
+print_loc	main.c	/^void print_loc(int x, int y) {$/;"	f
+print_page	main.c	/^void print_page(win w) {$/;"	f
+rem_line	1.c	/^        struct line *rem_line;$/;"	m	struct:line	typeref:struct:line::line	file:
+rem_line	main.c	/^        struct line *rem_line;$/;"	m	struct:line	typeref:struct:line::line	file:
+row_ptr	1.c	/^	int row_ptr, col_ptr;$/;"	m	struct:win	file:
+tot_lines	1.c	/^	int tot_lines;$/;"	m	struct:win	file:
+tot_lines	main.c	/^	int tot_lines, head_indx;$/;"	m	struct:win	file:
+win	1.c	/^typedef struct win {$/;"	s	file:
+win	1.c	/^} win;$/;"	t	typeref:struct:win	file:
+win	main.c	/^typedef struct win {$/;"	s	file:
+win	main.c	/^} win;$/;"	t	typeref:struct:win	file:
