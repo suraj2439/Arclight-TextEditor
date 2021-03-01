@@ -1,4 +1,4 @@
+rm a.out
 cc main.c -lncurses
 ./a.out
-rm a.out
 

@@ -32,6 +32,26 @@ typedef struct win {
 } win;
 
 
+void print(win w);
+void move_gap_left(line *lne, int position) ;
+void move_gap_right(line *lne, int position);
+line* move_cursor(line *subline, int position);
+void init_gap_buff(line *lne);
+void print_loc(int x, int y);
+void insert_at_pos(line *subline, int position, char data);
+void del_from_pos(win *w, int line_no, int position, FILE *fd_store_prev, FILE *fd_store_next, FILE *fd_main);
+void init_window(win *w, int tot_lines);
+FILE* load_file(win *w, char *filename);
+void print_page(win w);
+void print(win w);
+void free_line(line* lne);
+void load_next_line(win *w, FILE *fd_store_prev, FILE *fd_store_next, FILE *fd_main);
+void load_prev_line(win *w, FILE *fd_store_prev, FILE *fd_store_next);
+void extract_line(node_l *tmp, FILE *fd_store);
+void insert_new_line_at_pos(win *w, int line_no, int position, FILE *fd_prev, FILE *fd_nxt, FILE *fd_main);
+int head_index(win w, int line_no);
+
+
 // Used to move the gap left in the array
 // Assuming that position belong to given array
 void move_gap_left(line *lne, int position) {
@@ -121,6 +141,18 @@ line* move_cursor(line *subline, int position) {
 }
 
 
+
+void init_gap_buff(line *lne) {
+        // initially gap size = size of subline,
+        // left will be at pos 0 and right at max-1
+        lne->gap_left = 0;
+        lne->gap_right = MAX_CHAR_IN_SUBLINE - 1;
+        lne->gap_size = MAX_CHAR_IN_SUBLINE;
+        return;
+}
+
+
+
 void print_loc(int x, int y) {
         move(20, 20);
         mvprintw(10, 30, "x: %d y: %d", x, y);
@@ -173,70 +205,113 @@ void insert_at_pos(line *subline, int position, char data) {
 
 
 // TODO delete line if del position is 0
-void del_from_pos(win *w, int line_no, int position) {
-	int end = w->tot_lines - w->head_indx - 1;
+void del_from_pos(win *w, int line_no, int position, FILE *fd_store_prev, FILE *fd_store_next, FILE *fd_main) {
+	// if position not 0th position
+	if(position) {
+		int end = w->tot_lines - w->head_indx - 1;
 
-	line *lne;
-	int l_no;
-	if(line_no <= end)
-		l_no = line_no;
-	else
-		l_no = line_no - w->tot_lines;
+		line *lne;
+	        int l_no;
+        	if(line_no <= end)
+                	l_no = line_no;
+	        else
+        	        l_no = line_no - w->tot_lines;
+	
+        	lne = &((w->head)[l_no].line);
 
-	lne = &((w->head)[l_no].line);
-	(w->head)[l_no].line_size--;		// decrease line size
+		(w->head)[l_no].line_size--;		// decrease line size
 
-	//line *lne = (line_no <= end) ? &(w->head[line_no].line) : &(w->head[line_no - w->tot_lines]);
-	line *prev_lne = NULL;
+		// take next subline till position doesn't belong to corresponding curr_line
+		while((MAX_CHAR_IN_SUBLINE - lne->gap_size) < position) {
+			// decrease position
+	                position -= (MAX_CHAR_IN_SUBLINE - lne->gap_size);
+		
+			// position not belong to current subline take next line
+                	// if current subline is last
+	                if(lne->rem_line == NULL)
+				break;
+			// take next subline
+	                lne = lne->rem_line;
+		}
 
-	// take next subline till position doesn't belong to corresponding curr_line
-	while((MAX_CHAR_IN_SUBLINE - lne->gap_size) < position) {
-                // position not belong to current subline take next line
-                // if current subline is last
-                if(lne->rem_line == NULL)
-                        break;
-		// decrease position
-                position -= (MAX_CHAR_IN_SUBLINE - lne->gap_size);
-		// take next subline
-                prev_lne = lne;		// TODO not required
-                lne = lne->rem_line;
-		//printf("%d %d\n",position, lne->gap_size);
-        }
+		// Now position belongs to current subline
+        	// move cursor(gap) at appropriate position
+	        if (position < lne->gap_left)
+        	        move_gap_left(lne, position);
+		else if(position > lne->gap_right)
+        	        move_gap_right(lne, position);
 
-	//printf("%d %d\n", position, lne->gap_size);
-
-	// Now position belongs to current subline
-        // move cursor(gap) at appropriate position
-        if (position < lne->gap_left)
-                move_gap_left(lne, position);
-        else if(position > lne->gap_right)
-                move_gap_right(lne, position);
-
-
-	//printf("%d %d %d\n", lne->gap_left, lne->gap_right, position);
-	// if left gap boundary is at 0, take previous subline
-	// if prev subline not exist, then del not possible return
-	if(lne->gap_left == 0) {	//TODO this condition may not arise
-		if(prev_lne)
-			lne = prev_lne;
-		else
-			return;
+		// increase left boundary of gap buff to del char at given pos
+		lne->gap_left--;
+		lne->gap_size++;
+		return;
 	}
-	// increase left boundary of gap buff to del char at given pos
-	lne->gap_left--;
-	lne->gap_size++;
-	//printf("%d %d %d\n", lne->gap_left, lne->gap_right, lne->curr_line[0]);
-	return;
-}
 
+	// delete character from position 0
+	else {
+		// if first line
+		if(line_no == 0) {
+			// check if line is present in filename_prev.tmp file
+			if(fseek(fd_store_prev, -1, SEEK_CUR) != -1)    // present
+				fseek(fd_store_prev, 1, SEEK_CUR);
+			// else return as line not present to load previous line
+			else return;
 
-void init_gap_buff(line *lne) {
-	// initially gap size = size of subline,
-	// left will be at pos 0 and right at max-1
-	lne->gap_left = 0;
-	lne->gap_right = MAX_CHAR_IN_SUBLINE - 1;
-	lne->gap_size = MAX_CHAR_IN_SUBLINE;
-	return;
+			line *tmp = &(w->head->line);
+			int tmp_line_size = w->head->line_size;
+
+			line *new_line = (line*)malloc(sizeof(line));
+			// init new line
+			new_line->curr_line = (char*)malloc(sizeof(char) * MAX_CHAR_IN_SUBLINE);
+			// init next subline pointer with NULL
+                        new_line->rem_line = NULL;
+                        // init gap buffer
+                        init_gap_buff(new_line);
+                       
+			(w->head->line) = *new_line;
+			if(tmp == new_line)
+				printf("adsf;iajsd;fi");
+			// init line size
+			w->head->line_size = 0;
+
+			char c;
+
+			// if temp file in which previous data is stored, load one line
+			for(int i=0; ; i++) {
+				if(fseek(fd_store_prev, -2, SEEK_CUR) == -1) {
+					fseek(fd_store_prev, 0, SEEK_SET);	// goto start position
+					break;
+				}
+
+				c = fgetc(fd_store_prev);
+				if(c != '\n') {
+					insert_at_pos(lne, 0, c);
+					w->head->line_size++;
+				}
+				else break;
+			}
+
+			line *hi = &(w->head->line);
+			while(hi->rem_line)
+				hi = hi->rem_line;
+			hi->rem_line = tmp;
+			w->head->line_size += tmp_line_size;
+		}
+
+		/*
+		char ch;
+		int extract_from_next = 0;
+		if(fseek(fd_store_next, -1, SEEK_CUR) != -1) {
+			fseek(fd_store_next, 1, SEEK_CUR);
+			extract_from_next = 1;
+		}
+		else if((ch = fgetc(fd_main)) == -1) {
+			// next line not available
+			return;
+		}
+		ungetc(ch, fd_main);    // restoring previous condition
+	*/
+	}
 }
 
 
@@ -274,7 +349,7 @@ FILE* load_file(win *w, char *filename) {
                 	lne->curr_line[0] = MAX_CHAR;
                 	return fd_get;
         	}
-        	insert_at_pos(lne, indx++, c);
+		ungetc(c, fd_get);
 
 		while((c = fgetc(fd_get)) != '\n')
                 	insert_at_pos(lne, indx++, c);
@@ -326,7 +401,6 @@ void print_page(win w) {
         }
 	return;
 }
-
 
 
 void print(win w) {
@@ -395,6 +469,12 @@ void extract_line(node_l *tmp, FILE *fd_store) {
         line *data_line = &tmp->line;
 	int indx = 0;
 
+	// if line is empty means blank line, insert '\n' and return 	//TODO don changed
+	if(data_line->gap_size == MAX_CHAR_IN_SUBLINE && data_line->rem_line == NULL) {
+		fputc('\n', fd_store);
+		return;
+	}
+
 	if(data_line->gap_size != 0 && indx == data_line->gap_left)
 		indx = data_line->gap_right + 1;
 	char data = data_line->curr_line[indx++];
@@ -440,6 +520,7 @@ void load_next_line(win *w, FILE *fd_store_prev, FILE *fd_store_next, FILE *fd_m
 		// next line not available
 		return;
 	}
+	ungetc(ch, fd_main);	// restoring previous condition
 
 	/*extract first line of window from ADT to tmp file*/
         if(w->head->line.curr_line[0] != MAX_CHAR)
@@ -454,6 +535,8 @@ void load_next_line(win *w, FILE *fd_store_prev, FILE *fd_store_next, FILE *fd_m
 	w->head->line.rem_line = NULL;
 	// init gap buffer of new line
 	init_gap_buff(&w->head->line);
+	// init line size
+	w->head->line_size = 0;		//TODO don changed
 
 	// load next line from file
 	line *lne = &(w->head)->line;
@@ -461,13 +544,11 @@ void load_next_line(win *w, FILE *fd_store_prev, FILE *fd_store_next, FILE *fd_m
 
 	if(extract_from_next) {
 		// if temp file in which next data is stored, has data extract from there, 
-		w->head->line_size = 0;
 		for(int i=0; ; i++) {
-        	        if(fseek(fd_store_next, -2, SEEK_CUR) == -1) {
-				// 
-				fseek(fd_store_next, -1, SEEK_CUR);	// goto start position
+        	        if(fseek(fd_store_next, -2, SEEK_CUR) == -1) { 
+				fseek(fd_store_next, 0, SEEK_SET);	// goto start position
 				break;
-	                }
+			}
 	                c = fgetc(fd_store_next);
         	        if(c != '\n') {
 				// insert at position 0 because data is extracted in reverse passion
@@ -483,12 +564,11 @@ void load_next_line(win *w, FILE *fd_store_prev, FILE *fd_store_next, FILE *fd_m
 	// next line not present
 	else {
 		int indx = 0;
-		if(ch != '\n')
-			insert_at_pos(lne, indx++, ch);
-		
+		// insert till end of line
 		while((ch = fgetc(fd_main)) != '\n') {
 			insert_at_pos(lne, indx++, ch);
 		}
+		// set line size
 		w->head->line_size = indx;
 	}
 
@@ -530,19 +610,20 @@ void load_prev_line(win *w, FILE *fd_store_prev, FILE *fd_store_next) {
         w->head->line.rem_line = NULL;
         // init gap buffer of new line
         init_gap_buff(&w->head->line);
+	// init line size
+	w->head->line_size = 0;
 
         // load prev line from file
         line *lne = &(w->head)->line;
         char c;
 
         // if temp file in which previous data is stored, has data extract from there,
-        w->head->line_size = 0;
 	for(int i=0; ; i++) {
                 if(fseek(fd_store_prev, -2, SEEK_CUR) == -1) {
-                        if(fseek(fd_store_prev, -1, SEEK_CUR) == -1)	// file is empty
-                                break;
-			else return;
-                }
+			fseek(fd_store_prev, 0, SEEK_SET);	// goto start position
+			return;
+		}
+
                 c = fgetc(fd_store_prev);
                 if(c != '\n') {
                         insert_at_pos(lne, 0, c);
@@ -702,15 +783,20 @@ int main() {
 	fd_store_prev = fopen(".hi_pr.tmp", "w+");
         fd_store_next = fopen(".hi_nxt.tmp", "w+");
 
-	/*
+	
 	print(window_1);
 	printf("\n");
 	for(int i = 0; i < 1; i++) {
-		del_from_pos(&window_1, 0, 16);
+		load_next_line(&window_1, fd_store_prev, fd_store_next, fd_main);
+                print(window_1);
+                printf("abc %d\n",window_1.head_indx);
+                printf("\n");
+
+		del_from_pos(&window_1, 0, 0, fd_store_prev, fd_store_next, fd_main);
 		print(window_1);
 		printf("\n");
 		exit(1);
-		del_from_pos(&window_1, 0, 6);
+
 		//load_next_line(&window_1, fd_store_prev, fd_store_next, fd_main);
 		print(window_1);
 		//printf("abc %d\n",window_1.head_indx);
@@ -738,7 +824,6 @@ int main() {
                 printf("\n");
 	}
 	exit(1);
-*/
 	
 	// curses interface 
         initscr();
@@ -804,7 +889,9 @@ int main() {
 				break;
 
 			case KEY_BACKSPACE:
-				del_from_pos(&window_1, line_no, col_no--);
+				del_from_pos(&window_1, line_no, col_no--, fd_store_prev, fd_store_next, fd_main);
+				if(col_no = -1)
+					col_no = 0;
 				break;
 
 			case '\n':

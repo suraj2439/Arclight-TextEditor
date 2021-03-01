@@ -4,6 +4,8 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+BACKSPACE	main.c	7;"	d	file:
+DELETE	main.c	8;"	d	file:
 MAX_CHAR	main.c	6;"	d	file:
 MAX_CHAR_IN_LINE	1.c	3;"	d	file:
 MAX_CHAR_IN_SUBLINE	main.c	5;"	d	file:
