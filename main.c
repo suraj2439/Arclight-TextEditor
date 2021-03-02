@@ -52,6 +52,9 @@ void insert_new_line_at_pos(win *w, int line_no, int position, FILE *fd_prev, FI
 int head_index(win w, int line_no);
 int prev_line_into_data_struct(line *lne, FILE *fd_store_prev);
 int next_line_into_data_struct(line *lne, int extract_from_next, FILE *fd_store_next, FILE *fd_main);
+int check_next_line_available(FILE *fd_store_next, FILE *fd_main);
+int check_prev_line_available(FILE *fd_store_prev);
+
 
 // Used to move the gap left in the array
 // Assuming that position belong to given array
@@ -246,10 +249,8 @@ void del_from_pos(win *w, int *lne_no, int *col_no, FILE *fd_store_prev, FILE *f
 		// if first line
 		if(line_no == 0) {
 			// check if line is present in filename_prev.tmp file
-			if(fseek(fd_store_prev, -1, SEEK_CUR) != -1)    // present
-				fseek(fd_store_prev, 1, SEEK_CUR);
-			// else return as line not present to load previous line
-			else return;
+			if(! check_prev_line_available(fd_store_prev))
+				return;
 
 			line tmp = w->head->line;
 			int tmp_line_size = w->head->line_size;
@@ -285,36 +286,63 @@ void del_from_pos(win *w, int *lne_no, int *col_no, FILE *fd_store_prev, FILE *f
 		// not first line
 		else {
 			char ch;
-	        	int extract_from_next = 0;
-		       	if(fseek(fd_store_next, -1, SEEK_CUR) != -1) {
-                		fseek(fd_store_next, 1, SEEK_CUR);
-		                extract_from_next = 1;
-		        }
-		        else if((ch = fgetc(fd_main)) == -1) {
-                		// next line not available
-		        }
-		        ungetc(ch, fd_main);    // restoring previous condition
+	        	int extract_from_next = 0, not_available = 0;
+		        int check = check_next_line_available(fd_store_next, fd_main);
+		        
+			// next line not available
+		        if(! check)
+		                not_available = 1;
+		        // available in next_tmp_file
+		        if(check == 1)
+                		extract_from_next = 1;
 
-
+			// head_indx to current line(circular array)
 			int l_no = head_index(*w, line_no);
 
-	                line tmp = (w->head)[l_no].line;
-                        int tmp_line_size = w->head->line_size;
+			// malloc new line structure to join at end of previous line
+			line *new_line = (line*)malloc(sizeof(line));
+			*new_line = (w->head)[l_no].line;
+		
+			// add current line at the end of previous line	
+			int prev = head_index(*w, line_no - 1);
+			line *lne = &( (w->head[prev]).line );
+                        while(lne->rem_line)
+                                lne = lne->rem_line;
+                        lne->rem_line = new_line;
 
-                        line *new_line = (line*)malloc(sizeof(line));
-                        // init new line
+			// update co-ordinates(used in gui)
+			(*lne_no)--;
+			*col_no = (w->head[prev]).line_size;
+			(w->head[prev]).line_size += (w->head[l_no]).line_size;
+			
+			int i;
+			for(i = l_no; i < w->tot_lines - 1; i++) {
+				int curr = head_index(*w, i), next = head_index(*w, i+1);
+				// shift lines to make space at end to load next line from file	
+				w->head[curr].line = w->head[next].line;
+				w->head[curr].line_size = w->head[next].line_size;
+			}
+
+			int last = head_index(*w, i);
+			new_line = &(w->head[last].line);
+			
+			// init new line
                         new_line->curr_line = (char*)malloc(sizeof(char) * MAX_CHAR_IN_SUBLINE);
                         // init next subline pointer with NULL
                         new_line->rem_line = NULL;
                         // init gap buffer
                         init_gap_buff(new_line);
 
-                        (w->head)[l_no].line = *new_line;
-                        *new_line = tmp;
-                        // init line size
-                        w->head->line_size = 0;
-			
-			
+			// next line not available to load
+			if(not_available) {
+				new_line->curr_line[0] = MAX_CHAR;
+				w->head[last].line_size = 0;
+				return;
+			}
+		
+			// load next line from file and update line size	
+			w->head[last].line_size = next_line_into_data_struct(new_line, extract_from_next, fd_store_next, fd_main);
+			return;
 		}
 
 	}
