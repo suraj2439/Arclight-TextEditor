@@ -1,0 +1,13 @@
+	int load_rem;
+	 * or load_rem lines should be write in file*
+	 * should be loaded in buffer from file
+	* to indicate next load_rem lines 
+	int tot_lines;
+	node_l *head;
+typedef struct win_buff {
+/*
+
+
+} node_l;
+	line line;
+	struct node_l* prev;

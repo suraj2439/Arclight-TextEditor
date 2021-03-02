@@ -162,6 +162,9 @@ void print_loc(int x, int y) {
         mvprintw(10, 30, "x: %d y: %d", x, y);
 }
 
+void print_debug(int x, int y) {
+        mvprintw(15, 60, "k: %d b: %d", x, y);
+}
 
 
 // Function to insert character at position
@@ -208,7 +211,6 @@ void insert_at_pos(line *subline, int position, char data) {
 
 
 
-// TODO delete line if del position is 0
 void del_from_pos(win *w, int *lne_no, int *col_no, FILE *fd_store_prev, FILE *fd_store_next, FILE *fd_main) {
 	int line_no = *lne_no, position = *col_no;
 	// if position not 0th position
@@ -717,10 +719,6 @@ void insert_new_line_at_pos(win *w, int *lne_no, int *col_no, FILE *fd_prev, FIL
 	int line_no = *lne_no, position = *col_no;
 	// not last line
 	if(line_no != w->tot_lines - 1) {
-		// update co ordinates(used in gui)
-		(*lne_no)++;
-		*col_no = 0;
-
 		int last = head_index(*w, w->tot_lines-1);
 		
 		extract_line(&(w->head[last]), fd_nxt);
@@ -742,8 +740,9 @@ void insert_new_line_at_pos(win *w, int *lne_no, int *col_no, FILE *fd_prev, FIL
                 (w->head)[empty].line.rem_line = NULL;
                 // init gap buffer
                 init_gap_buff(&(w->head[empty]).line);
-		
-		line *lne = move_cursor(&(w->head)[head_index(*w, line_no)].line, position);
+	
+		int current = head_index(*w, line_no);	
+		line *lne = move_cursor(&(w->head)[current].line, position);
 		position = lne->gap_right + 1;
 
 		// insert data in next blank line 
@@ -754,122 +753,50 @@ void insert_new_line_at_pos(win *w, int *lne_no, int *col_no, FILE *fd_prev, FIL
 
                         insert_at_pos(&((w->head)[empty].line), indx++, lne->curr_line[position++]);
                 }
+	
+		// update line size of both lines	
+		(w->head[empty]).line_size = (w->head[current]).line_size - *col_no;
+		(w->head[current]).line_size = *col_no;
+
 		// if next subline is present then point rem_line pointer to that subline
                 // so that copy operation will be saved
                 (w->head)[empty].line.rem_line = lne->rem_line;
-		lne->gap_size -= indx;   // change gap_size
+		lne->gap_size += indx;   // change gap_size
                 // gap_right = end to indicate all data after position is deleted
                 lne->gap_right = MAX_CHAR_IN_SUBLINE - 1;
                 lne->rem_line = NULL;
 
-
-
-
-/*
-	// extract last line into filename_nxt.tmp file
-		if(w->head_indx) {
-			extract_line(&(w->head[-1]), fd_nxt);
-			free_line(&(w->head[-1]).line);
-		}
-		else {
-			extract_line(&(w->head[w->tot_lines - 1]), fd_nxt);
-			free_line(&(w->head[w->tot_lines - 1]).line);
-		}
-	
-	
-		int curr, prev, end;
-		end = w->tot_lines - w->head_indx - 1;
-		prev = (w->head_indx) ? -1 : end - w->tot_lines - 1;
-		curr = (prev - 1 < (-1*w->head_indx)) ? end : prev - 1;
-		
-		// shift line pointer by one unit to create space for blank line
-		for(int i = 0; i < ( (w->tot_lines-1) - (line_no+1) ); i++) {
-			(w->head)[prev].line = (w->head)[curr].line;
-			prev--;
-			prev = (prev < (-1*w->head_indx)) ? end : prev;
-			curr = (prev - 1 < (-1*w->head_indx)) ? end : prev - 1;
-		}
-		
-		// init new line
-		(w->head)[prev].line.curr_line = (char*)malloc(sizeof(char) * MAX_CHAR_IN_SUBLINE);
-		// init next subline pointer with NULL
-                (w->head)[prev].line.rem_line = NULL;
-		// init gap buffer
-		init_gap_buff(&(w->head[prev]).line);
-
-		// line in which new line to be inserted 
-		line *lne = &(w->head[line_no]).line;
-        	// take next subline till position doesn't belong to corresponding curr_line
-	        while((MAX_CHAR_IN_SUBLINE - lne->gap_size) < position) {
-       	        	// position not belong to current subline take next line
-	                // if current subline is last
-                	if(lne->rem_line == NULL)
-                        	break;
-                	// take next subline
-                	lne = lne->rem_line;
-                	// decrease position
-                	position -= (MAX_CHAR_IN_SUBLINE - lne->gap_size);
-		}
-
-		lne = move_cursor(lne, position);
-		position = lne->gap_right + 1;
-
-		// insert data in next blank line 
-		int indx = 0;
-		while(position < MAX_CHAR_IN_SUBLINE) {
-			if(position == lne->gap_left)
-				position = lne->gap_right + 1;
-
-			insert_at_pos(&((w->head)[prev].line), indx++, lne->curr_line[position++]);
-		}
-		(w->head)[prev].line.rem_line = lne->rem_line;
-		
-		// if next subline is present then point rem_line pointer to that subline 
-		// so that copy operation will be saved
-		lne->gap_size = MAX_CHAR_IN_SUBLINE - lne->gap_right;	// change gap_size
-		// gap_right = end to indicate all data after position is deleted
-		lne->gap_right = MAX_CHAR_IN_SUBLINE - 1;
-		lne->rem_line = NULL;
-	*/
+		// update co ordinates(used in gui)
+                (*lne_no)++;
+                *col_no = 0;
 	}
-
+	// last line
 	else {
 		extract_line(w->head, fd_prev);
 		free_line( &(w->head->line) );
 
-		int curr = -1, next, end;
-                end = w->tot_lines - w->head_indx - 1;
-
                 // shift line pointer by one unit to create space for blank line
                 for(int i = 0; i < (w->tot_lines-1); i++) {
-			curr++;
-			curr = (curr <= end) ? curr : (-1*w->head_indx);
-                        next = (curr + 1 <= end) ? curr+1 : (-1*w->head_indx);
-                        (w->head)[curr].line = (w->head)[next].line;
+			int curr = head_index(*w, i);
+                        int next = head_index(*w, i+1);
+                        
+			(w->head)[curr].line = (w->head)[next].line;
+			(w->head)[curr].line_size = (w->head)[next].line_size;
                 }
 
+		int current = head_index(*w, line_no);
+		int prev = head_index(*w, line_no-1);
 		// init new line
-                (w->head)[next].line.curr_line = (char*)malloc(sizeof(char) * MAX_CHAR_IN_SUBLINE);
+                (w->head)[current].line.curr_line = (char*)malloc(sizeof(char) * MAX_CHAR_IN_SUBLINE);
                 // init next subline pointer with NULL
-                (w->head)[next].line.rem_line = NULL;
+                (w->head)[current].line.rem_line = NULL;
                 // init gap buffer
-                init_gap_buff(&(w->head[next]).line);
+                init_gap_buff(&(w->head[current]).line);
 		
 		// line in which new line to be inserted
-                line *lne = &(w->head[curr]).line;
+                line *lne = &(w->head[prev]).line;
 
-                // take next subline till position doesn't belong to corresponding curr_line
-                while((MAX_CHAR_IN_SUBLINE - lne->gap_size) < position) {
-                        // position not belong to current subline take next line
-                        // if current subline is last
-                        if(lne->rem_line == NULL)
-                                break;
-                        // take next subline
-                        lne = lne->rem_line;
-                        // decrease position
-                        position -= (MAX_CHAR_IN_SUBLINE - lne->gap_size);
-                }
-
+		// move cursor to appropriate position with adjusted gap buffer at position
 		lne = move_cursor(lne, position);
                 position = lne->gap_right + 1;
 
@@ -879,16 +806,24 @@ void insert_new_line_at_pos(win *w, int *lne_no, int *col_no, FILE *fd_prev, FIL
                         if(position == lne->gap_left)
                                 position = lne->gap_right + 1;
 
-                        insert_at_pos( &((w->head)[next].line), indx++, lne->curr_line[position++] );
+                        insert_at_pos( &((w->head)[current].line), indx++, lne->curr_line[position++] );
                 }
-                (w->head)[next].line.rem_line = lne->rem_line;
+
+		// update line size of both lines
+		(w->head[prev]).line_size = *col_no;
+                (w->head[current]).line_size = (w->head[current]).line_size - *col_no;
+
+                (w->head)[current].line.rem_line = lne->rem_line;
 
                 // if next subline is present then point rem_line pointer to that subline
                 // so that copy operation will be saved
-                lne->gap_size = MAX_CHAR_IN_SUBLINE - lne->gap_right;   // change gap_size
+                lne->gap_size += indx;   // change gap_size
                 // gap_right = end to indicate all data after position is deleted
                 lne->gap_right = MAX_CHAR_IN_SUBLINE - 1;
                 lne->rem_line = NULL;
+
+		// update co ordinates(used in gui)
+                *col_no = 0;
 	}
 	return;
 }
