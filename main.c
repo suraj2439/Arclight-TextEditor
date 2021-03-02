@@ -39,7 +39,7 @@ line* move_cursor(line *subline, int position);
 void init_gap_buff(line *lne);
 void print_loc(int x, int y);
 void insert_at_pos(line *subline, int position, char data);
-void del_from_pos(win *w, int line_no, int position, FILE *fd_store_prev, FILE *fd_store_next, FILE *fd_main);
+void del_from_pos(win *w, int *line_no, int *position, FILE *fd_store_prev, FILE *fd_store_next, FILE *fd_main);
 void init_window(win *w, int tot_lines);
 FILE* load_file(win *w, char *filename);
 void print_page(win w);
@@ -50,7 +50,8 @@ void load_prev_line(win *w, FILE *fd_store_prev, FILE *fd_store_next);
 void extract_line(node_l *tmp, FILE *fd_store);
 void insert_new_line_at_pos(win *w, int line_no, int position, FILE *fd_prev, FILE *fd_nxt, FILE *fd_main);
 int head_index(win w, int line_no);
-
+int prev_line_into_data_struct(line *lne, FILE *fd_store_prev);
+int next_line_into_data_struct(line *lne, int extract_from_next, FILE *fd_store_next, FILE *fd_main);
 
 // Used to move the gap left in the array
 // Assuming that position belong to given array
@@ -135,7 +136,7 @@ line* move_cursor(line *subline, int position) {
 	// move cursor(gap) at appropriate position
 	if (position < lne->gap_left)
 		move_gap_left(lne, position);
-	else if(position > lne->gap_right) 
+	else 
 		move_gap_right(lne, position);
 	return lne;
 }
@@ -205,19 +206,16 @@ void insert_at_pos(line *subline, int position, char data) {
 
 
 // TODO delete line if del position is 0
-void del_from_pos(win *w, int line_no, int position, FILE *fd_store_prev, FILE *fd_store_next, FILE *fd_main) {
+void del_from_pos(win *w, int *lne_no, int *col_no, FILE *fd_store_prev, FILE *fd_store_next, FILE *fd_main) {
+	int line_no = *lne_no, position = *col_no;
 	// if position not 0th position
 	if(position) {
-		int end = w->tot_lines - w->head_indx - 1;
+		// decrease col_no(used in gui)
+		(*col_no)--;
 
-		line *lne;
-	        int l_no;
-        	if(line_no <= end)
-                	l_no = line_no;
-	        else
-        	        l_no = line_no - w->tot_lines;
-	
-        	lne = &((w->head)[l_no].line);
+		int l_no = head_index(*w, line_no);
+
+        	line *lne = &((w->head)[l_no].line);
 
 		(w->head)[l_no].line_size--;		// decrease line size
 
@@ -236,11 +234,7 @@ void del_from_pos(win *w, int line_no, int position, FILE *fd_store_prev, FILE *
 
 		// Now position belongs to current subline
         	// move cursor(gap) at appropriate position
-	        if (position < lne->gap_left)
-        	        move_gap_left(lne, position);
-		else if(position > lne->gap_right)
-        	        move_gap_right(lne, position);
-
+		move_cursor(lne, position);
 		// increase left boundary of gap buff to del char at given pos
 		lne->gap_left--;
 		lne->gap_size++;
@@ -257,7 +251,7 @@ void del_from_pos(win *w, int line_no, int position, FILE *fd_store_prev, FILE *
 			// else return as line not present to load previous line
 			else return;
 
-			line *tmp = &(w->head->line);
+			line tmp = w->head->line;
 			int tmp_line_size = w->head->line_size;
 
 			line *new_line = (line*)malloc(sizeof(line));
@@ -269,48 +263,60 @@ void del_from_pos(win *w, int line_no, int position, FILE *fd_store_prev, FILE *
                         init_gap_buff(new_line);
                        
 			(w->head->line) = *new_line;
-			if(tmp == new_line)
-				printf("adsf;iajsd;fi");
+			*new_line = tmp;
 			// init line size
 			w->head->line_size = 0;
 
 			char c;
 
-			// if temp file in which previous data is stored, load one line
-			for(int i=0; ; i++) {
-				if(fseek(fd_store_prev, -2, SEEK_CUR) == -1) {
-					fseek(fd_store_prev, 0, SEEK_SET);	// goto start position
-					break;
-				}
+			line *lne = &(w->head->line);
+			// load previous line from file and update line_size
+			w->head->line_size = prev_line_into_data_struct(lne, fd_store_prev);
 
-				c = fgetc(fd_store_prev);
-				if(c != '\n') {
-					insert_at_pos(lne, 0, c);
-					w->head->line_size++;
-				}
-				else break;
-			}
-
-			line *hi = &(w->head->line);
-			while(hi->rem_line)
-				hi = hi->rem_line;
-			hi->rem_line = tmp;
+			lne = &(w->head->line);
+			while(lne->rem_line)
+				lne = lne->rem_line;
+			lne->rem_line = new_line;
+			// adjust col_no(used in gui)
+			*col_no = w->head->line_size;
 			w->head->line_size += tmp_line_size;
-		}
-
-		/*
-		char ch;
-		int extract_from_next = 0;
-		if(fseek(fd_store_next, -1, SEEK_CUR) != -1) {
-			fseek(fd_store_next, 1, SEEK_CUR);
-			extract_from_next = 1;
-		}
-		else if((ch = fgetc(fd_main)) == -1) {
-			// next line not available
 			return;
 		}
-		ungetc(ch, fd_main);    // restoring previous condition
-	*/
+		// not first line
+		else {
+			char ch;
+	        	int extract_from_next = 0;
+		       	if(fseek(fd_store_next, -1, SEEK_CUR) != -1) {
+                		fseek(fd_store_next, 1, SEEK_CUR);
+		                extract_from_next = 1;
+		        }
+		        else if((ch = fgetc(fd_main)) == -1) {
+                		// next line not available
+		        }
+		        ungetc(ch, fd_main);    // restoring previous condition
+
+
+			int l_no = head_index(*w, line_no);
+
+	                line tmp = (w->head)[l_no].line;
+                        int tmp_line_size = w->head->line_size;
+
+                        line *new_line = (line*)malloc(sizeof(line));
+                        // init new line
+                        new_line->curr_line = (char*)malloc(sizeof(char) * MAX_CHAR_IN_SUBLINE);
+                        // init next subline pointer with NULL
+                        new_line->rem_line = NULL;
+                        // init gap buffer
+                        init_gap_buff(new_line);
+
+                        (w->head)[l_no].line = *new_line;
+                        *new_line = tmp;
+                        // init line size
+                        w->head->line_size = 0;
+			
+			
+		}
+
 	}
 }
 
@@ -406,6 +412,7 @@ void print_page(win w) {
 void print(win w) {
         line *lne;
         int h_indx;
+	int a = 0;
         for(int i = 0; i < w.tot_lines; i++) {
                 h_indx = i;
                 // circular array
@@ -419,12 +426,10 @@ void print(win w) {
                 if(lne->curr_line[0] == MAX_CHAR)
                         return;
 
-                while(1) {
-			//printf("\n");
-			//printf("%d %d %d %d\n", lne->gap_size, lne->gap_left, lne->gap_right, indx);
+		while(1) {
                         if(lne->gap_size != 0 && indx == lne->gap_left)
                                 indx = lne->gap_right + 1;
-                        if(indx == MAX_CHAR_IN_SUBLINE) {
+			if(indx == MAX_CHAR_IN_SUBLINE) {
                                 if(lne->rem_line == NULL) {
                                         printf("\n");
                                         break;
@@ -433,11 +438,9 @@ void print(win w) {
                                 indx = 0;
 				continue;
                         }
-
-			//printf("%d %d %d %d\n", lne->gap_size, lne->gap_left, lne->gap_right, indx);
                         c = lne->curr_line[indx++];
-                        printf("%c", c);
-                }
+			printf("%c", c);
+		}
         }
         return;
 }
@@ -503,24 +506,120 @@ void extract_line(node_l *tmp, FILE *fd_store) {
 }
 
 
+// use to copy line from next line from file to give line in datastructure
+// NOTE:- extract_from_next 1 if line to be extracted from tmp_next file 
+// else 0 if line to be extracted from main file
+// line must be present in either of two files if not , condn should be handle by caller of this fun
+// return number of characters loaded into line from file
+int next_line_into_data_struct(line *lne, int extract_from_next, FILE *fd_store_next, FILE *fd_main) {
+	char c;
+	if(extract_from_next) {
+		int count = 0;
+                // if temp file in which next data is stored, has data extract from there,
+                for(int i=0; ; i++) {
+                        if(fseek(fd_store_next, -2, SEEK_CUR) == -1) {
+                                fseek(fd_store_next, 0, SEEK_SET);      // goto start position
+                                return count;
+                        }
+                        c = fgetc(fd_store_next);
+                        if(c != '\n') {
+                                // insert at position 0 because data is extracted in reverse passion
+                                insert_at_pos(lne, 0, c);
+                                count++;
+                        }
+                        else return count;
+                }
+        }
+
+        // Now if line is not present in filename_nxt.tmp file
+        // then extract from main file
+        // next line not present
+        else {
+                int indx = 0;
+                // insert till end of line
+                while((c = fgetc(fd_main)) != '\n') {
+                        insert_at_pos(lne, indx++, c);
+                }
+                return indx;
+        }
+
+}
+
+
+// use to copy line from prev line from file to give line in datastructure
+// line must be present in either of two files if not , condn should be handle by caller of this fun
+// return number of characters loaded into line from file
+int prev_line_into_data_struct(line *lne, FILE *fd_store_prev) {
+	int count = 0;
+	char c;
+        // if temp file in which previous data is stored, has data extract from there,
+        for(int i=0; ; i++) {
+                if(fseek(fd_store_prev, -2, SEEK_CUR) == -1) {
+                        fseek(fd_store_prev, 0, SEEK_SET);      // goto start position
+                        return count;
+                }
+
+                c = fgetc(fd_store_prev);
+                if(c != '\n') {
+                        insert_at_pos(lne, 0, c);
+                        count++;
+                }
+                else return count;
+        }
+}
+
+
+/* func to check next line is available or not
+ * return 0 if not available
+ * return 1 if available in next tmp_file
+ * reutrn 2 if not available in next tmp_file but available in main file
+ * */
+int check_next_line_available(FILE *fd_store_next, FILE *fd_main) {
+	char ch;
+        if(fseek(fd_store_next, -1, SEEK_CUR) != -1) {
+                fseek(fd_store_next, 1, SEEK_CUR);
+		return 1;
+        }
+        else if((ch = fgetc(fd_main)) == -1) {
+                // next line not available
+                return 0;
+        }
+        ungetc(ch, fd_main);    // restoring previous condition
+	return 2;
+}
+
+
+/* func to check next line is available or not
+ * return 0 if not available
+ * return 1 if available
+ */
+int check_prev_line_available(FILE *fd_store_prev) {
+	// check if line is present in filename_prev.tmp file
+        if(fseek(fd_store_prev, -1, SEEK_CUR) != -1) {    // present
+                fseek(fd_store_prev, 1, SEEK_CUR);
+		return 1;
+	}
+        // else return as line not present to load previous line
+        return 0;
+}
+
+
 /*
  * used to load next line at last, after removing first line.
  * fd_store_prev : file descripter to store line which is just to be removed from top of ADT
  * fd_store_next : file descripter to store line which is just to be removed from bottom of ADT
  * fd_get   : file descripter to pointing in main file.
- * */
+ */
 void load_next_line(win *w, FILE *fd_store_prev, FILE *fd_store_next, FILE *fd_main) {	
 	char ch;
 	int extract_from_next = 0;
-	if(fseek(fd_store_next, -1, SEEK_CUR) != -1) {
-		fseek(fd_store_next, 1, SEEK_CUR);
-		extract_from_next = 1;
-	}
-	else if((ch = fgetc(fd_main)) == -1) {
-		// next line not available
+	int check = check_next_line_available(fd_store_next, fd_main);
+	// next line not available
+	if(! check)
 		return;
-	}
-	ungetc(ch, fd_main);	// restoring previous condition
+	// available in next_tmp_file
+	if(check == 1)
+		extract_from_next = 1;
 
 	/*extract first line of window from ADT to tmp file*/
         if(w->head->line.curr_line[0] != MAX_CHAR)
@@ -542,35 +641,8 @@ void load_next_line(win *w, FILE *fd_store_prev, FILE *fd_store_next, FILE *fd_m
 	line *lne = &(w->head)->line;
 	char c;
 
-	if(extract_from_next) {
-		// if temp file in which next data is stored, has data extract from there, 
-		for(int i=0; ; i++) {
-        	        if(fseek(fd_store_next, -2, SEEK_CUR) == -1) { 
-				fseek(fd_store_next, 0, SEEK_SET);	// goto start position
-				break;
-			}
-	                c = fgetc(fd_store_next);
-        	        if(c != '\n') {
-				// insert at position 0 because data is extracted in reverse passion
-				insert_at_pos(lne, 0, c);
-				w->head->line_size++;
-			}
-			else break;
-	        }
-	}
-
-	// Now if line is not present in filename_nxt.tmp file 
-	// then extract from main file
-	// next line not present
-	else {
-		int indx = 0;
-		// insert till end of line
-		while((ch = fgetc(fd_main)) != '\n') {
-			insert_at_pos(lne, indx++, ch);
-		}
-		// set line size
-		w->head->line_size = indx;
-	}
+	// load next line and change line size accordingly
+	w->head->line_size = next_line_into_data_struct(lne, extract_from_next, fd_store_next, fd_main);
 
 	w->head_indx = (w->head_indx + 1) % w->tot_lines;
 	
@@ -583,11 +655,9 @@ void load_next_line(win *w, FILE *fd_store_prev, FILE *fd_store_next, FILE *fd_m
 
 
 void load_prev_line(win *w, FILE *fd_store_prev, FILE *fd_store_next) {
-	// check if line is present in filename_prev.tmp file
-	if(fseek(fd_store_prev, -1, SEEK_CUR) != -1)	// present
-		fseek(fd_store_prev, 1, SEEK_CUR);
-	// else return as line not present to load previous line
-	else return;
+	// check previous line is available or not
+	if(! check_prev_line_available(fd_store_prev))
+		return;
 
 	// point head pointer to previous line
 	if(w->head_indx == 0) {
@@ -615,22 +685,8 @@ void load_prev_line(win *w, FILE *fd_store_prev, FILE *fd_store_next) {
 
         // load prev line from file
         line *lne = &(w->head)->line;
-        char c;
-
-        // if temp file in which previous data is stored, has data extract from there,
-	for(int i=0; ; i++) {
-                if(fseek(fd_store_prev, -2, SEEK_CUR) == -1) {
-			fseek(fd_store_prev, 0, SEEK_SET);	// goto start position
-			return;
-		}
-
-                c = fgetc(fd_store_prev);
-                if(c != '\n') {
-                        insert_at_pos(lne, 0, c);
-			w->head->line_size++;
-		}
-                else return;
-        }
+	w->head->line_size = prev_line_into_data_struct(lne, fd_store_prev);
+	return;
 }
 
 
@@ -773,7 +829,6 @@ int head_index(win w, int line_no) {	//TODO: use in print fun
 }
 
 
-
 int main() {
 	win window_1;
 	FILE *fd_store_prev, *fd_store_next, *fd_main;
@@ -783,18 +838,23 @@ int main() {
 	fd_store_prev = fopen(".hi_pr.tmp", "w+");
         fd_store_next = fopen(".hi_nxt.tmp", "w+");
 
-	
-	print(window_1);
-	printf("\n");
+/*	
+	//print(window_1);
+	//printf("\n");
+	int a = 0, b = 0;
 	for(int i = 0; i < 1; i++) {
 		load_next_line(&window_1, fd_store_prev, fd_store_next, fd_main);
-                print(window_1);
-                printf("abc %d\n",window_1.head_indx);
-                printf("\n");
+                //print(window_1);
+                //printf("abc %d\n",window_1.head_indx);
+                //printf("\n");
 
-		del_from_pos(&window_1, 0, 0, fd_store_prev, fd_store_next, fd_main);
+		del_from_pos(&window_1, 0, 0, &a, &b, fd_store_prev, fd_store_next, fd_main);
 		print(window_1);
 		printf("\n");
+		
+		del_from_pos(&window_1, 0, 2, &a, &b, fd_store_prev, fd_store_next, fd_main);
+		print(window_1);
+                printf("\n");
 		exit(1);
 
 		//load_next_line(&window_1, fd_store_prev, fd_store_next, fd_main);
@@ -824,7 +884,7 @@ int main() {
                 printf("\n");
 	}
 	exit(1);
-	
+*/
 	// curses interface 
         initscr();
         noecho();
@@ -889,9 +949,7 @@ int main() {
 				break;
 
 			case KEY_BACKSPACE:
-				del_from_pos(&window_1, line_no, col_no--, fd_store_prev, fd_store_next, fd_main);
-				if(col_no = -1)
-					col_no = 0;
+				del_from_pos(&window_1, &line_no, &col_no, fd_store_prev, fd_store_next, fd_main);
 				break;
 
 			case '\n':

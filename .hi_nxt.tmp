@@ -1,0 +1,12 @@
+
+
+} node_l;
+	line line;
+	struct node_l* prev;
+	struct node_l* next;
+typedef struct node_l { 
+ * contain pointer of correspondig line */
+/* struct for one line,
+} line;
+        struct line *rem_line;
+/*if line is big store next remaining line*/

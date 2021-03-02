@@ -1,1 +1,14 @@
 #include <stdio.h>
+#include <stdlib.h>
+#define MAX_CHAR_IN_LINE	10
+typedef struct line {
+        char *curr_line;
+/*if line is big store next remaining line*/
+        struct line *rem_line;
+} line;
+/* struct for one line,
+ * contain pointer of correspondig line */
+typedef struct node_l { 
+	struct node_l* next;
+	struct node_l* prev;
+	line line;
