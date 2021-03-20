@@ -6,6 +6,8 @@ typedef struct line {
 /*if line is big store next remaining line*/
         struct line *rem_line;
 } line;
+
+
 /* struct for one line,
  * contain pointer of correspondig line */
 typedef struct node_l { 
@@ -13,18 +15,6 @@ typedef struct node_l {
 	struct node_l* prev;
 	line line;
 } node_l;
-
-
-/*
-typedef struct win_buff {
-	node_l *head;
-	int tot_lines;
-	* to indicate next load_rem lines 
-	 * should be loaded in buffer from file
-	 * or load_rem lines should be write in file*
-	int load_rem;
-} win_buff;
-*/
 
 typedef struct win {
 	node_l *head;

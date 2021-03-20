@@ -305,7 +305,7 @@ void del_from_pos(win *w, int *lne_no, int *col_no, FILE *fd_store_prev, FILE *f
 			(w->head[prev]).line_size += (w->head[l_no]).line_size;
 			
 			int i;
-			for(i = l_no; i < w->tot_lines - 1; i++) {
+			for(i = line_no; i < w->tot_lines - 1; i++) {
 				int curr = head_index(*w, i), next = head_index(*w, i+1);
 				// shift lines to make space at end to load next line from file	
 				w->head[curr].line = w->head[next].line;
@@ -487,7 +487,7 @@ void free_line(line* lne) {
 // suplimentary fun
 void extract_line(node_l *tmp, FILE *fd_store) {
         line *data_line = &tmp->line;
-	int indx = -1;
+	int indx = 0;
 
 	// if line is empty means blank line, insert '\n' and return 	//TODO don changed
 	if(data_line->gap_size == MAX_CHAR_IN_SUBLINE && data_line->rem_line == NULL) {
@@ -500,10 +500,10 @@ void extract_line(node_l *tmp, FILE *fd_store) {
 	
 	char data;
 	while(1) {
-		indx++;
-		// skip gap 
-		if(data_line->gap_size != 0 && indx == data_line->gap_left)
-			indx = data_line->gap_right + 1;
+		//indx++;
+		// skip gap
+                if(data_line->gap_size != 0 && indx == data_line->gap_left)
+                        indx = data_line->gap_right + 1;
 
 		// if indx is at end of subline
 		if(indx == MAX_CHAR_IN_SUBLINE) {
@@ -515,13 +515,15 @@ void extract_line(node_l *tmp, FILE *fd_store) {
 			// take next subline
 			data_line = data_line->rem_line;
 			indx = 0;
+			if(data_line->gap_left == indx)		// if next next lines gap is at start(0th pos)	
+				continue;
 		}
 
 		if(data_line->gap_size == MAX_CHAR_IN_SUBLINE) { 	// TODO must be handle in del_from_pos fun
 			indx = MAX_CHAR_IN_SUBLINE -1;
 			continue;
 		}
-		data = data_line->curr_line[indx];
+		data = data_line->curr_line[indx++];
                 //printf("%c %d %d %d %d\n", data, data_line->gap_left, data_line->gap_right, data_line->gap_size, indx);
                 // store data in tmp_prev file
                 fputc(data, fd_store);
@@ -848,8 +850,8 @@ int main() {
         fd_store_next = fopen(".hi_nxt.tmp", "w+");
 
 	/*
-	//print(window_1);
-	//printf("\n");
+	print(window_1);
+	printf("\n");
 	int a = 0, b = 0;
 	for(int i = 0; i < 1; i++) {
 		//load_next_line(&window_1, fd_store_prev, fd_store_next, fd_main);
@@ -857,10 +859,18 @@ int main() {
                 //printf("abc %d\n",window_1.head_indx);
                 //printf("\n");
 
-		a = 0, b = 100;
+		a = 4, b = 0;
+		load_next_line(&window_1, fd_store_prev, fd_store_next, fd_main);
+		print(window_1);
+	        printf("\n");
+
 		del_from_pos(&window_1, &a, &b, fd_store_prev, fd_store_next, fd_main);
+		//load_next_line(&window_1, fd_store_prev, fd_store_next, fd_main);
+		//load_next_line(&window_1, fd_store_prev, fd_store_next, fd_main);
+		//load_next_line(&window_1, fd_store_prev, fd_store_next, fd_main);
 		print(window_1);
 		printf("\n");
+		exit(1);
 		
 		a= 0, b = 100;
 		del_from_pos(&window_1, &a, &b, fd_store_prev, fd_store_next, fd_main);
@@ -900,7 +910,6 @@ int main() {
 	}
 	exit(1);
 */
-
 	// curses interface 
         initscr();
         noecho();
@@ -983,47 +992,5 @@ int main() {
 		move(line_no, col_no);
 	}
 
-	/*
-	printf("\n");
-	insert_at_pos(&(window_1.head->line), 2, 'z');
-	print(window_1);
-
-	printf("\n");
-        insert_at_pos(&(window_1.head->line), 2, 'k');
-        print(window_1);
-	
-	printf("\n");
-        insert_at_pos(&(window_1.head->line), 5, 'z');
-	*/
-
-	//print(window_1);
-	//printf("fd\n");
-	//del_from_pos(&window_1,0, 1);
-	//printf("\n");
-	//print(window_1);
-
-	/*
-	fd_store_prev = fopen(".hi_pr.tmp", "w+");
-	fd_store_next = fopen(".hi_nxt.tmp", "w+");
-
-	print(window_1);
-	printf("\n");
-
-	for(int i = 0; i< 6; i++)
-		load_next_line(&window_1, fd_store_prev, fd_store_next, fd_main);
-
-	print(window_1);
-	printf("\n");
-	insert_new_line_at_pos(&window_1, 4, 8, fd_store_prev, fd_store_next, fd_main) ;
-
-	//load_next_line(&window_1, fd_store_prev, fd_store_next, fd_main);
-
-	print(window_1);
-	printf("\n");*/
-	/*
-	for(int i = 0; i< 10; i++)
-		load_prev_line(&window_1, fd_store_prev, fd_store_next);
-	print(window_1);
-	*/
 	return 0;
 }
