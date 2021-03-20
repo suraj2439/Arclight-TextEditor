@@ -1,4 +1,5 @@
-rm a.out
-cc main.c -lncurses
+cc -c main.c init_editor.c editor_func.c gap_buffer.c line.c
+cc main.o init_editor.o editor_func.o gap_buffer.o line.o -lncurses
+rm main.o init_editor.o editor_func.o gap_buffer.o line.o
 ./a.out
-
+rm a.out

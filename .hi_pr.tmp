@@ -1,8 +1,7 @@
 #include <stdio.h>
-#include <stdlib.h>
-#define MAX_CHAR_IN_LINE	10
+#include <stdlib.h#define MAX_CHAR_IN_LINE	10
 typedef struct line {
-   _line;
+        char *curr_line;
 /*if line is big store next remaining line*/
         struct line *rem_line;
 } line;
@@ -35,7 +34,8 @@ void insertBegin(node_l** start, line line) {
 	else return;
 
 	if(*start == NULL) {
-		*starext = (*start)->prev = *start;
+		*start = new_node;
+		(*start)->next = (*start)->prev = *start;
 		return;
 	}
 
@@ -189,42 +189,4 @@ void free_rem_lines(line* lne) {
 
 
 /*
- * used to load next line at last, after removing first line.
- * fdd: file descripter to store line which is to be removed.
- */
-void load_next_line(win *w, FILE *fdd) {
-	node_l* tmp;
-	tmp = w->head;
-	w->head = w->head->next;
-
-	line *data_line = &tmp->line;
-	int indx = 0;
-	char data = data_line->curr_line[indx++];
-	while(data != '\n') {
-		fputc(data, fdd);
-		if(indx == MAX_CHAR_IN_LINE) {
-			data_line = data_line->rem_line;
-			indx = 0;
-		}
-		data = data_line->curr_line[indx++];
-		if(indx == 0) {
-			printf("%c ", data);
-			exit(1);
-		}
-	}
-	/*to store last \n at the end of line*/
-	fputc('\n', fdd);
-
-	free_rem_lines(&tmp->line);
-	return;
-}
-
-int main() {
-	win window_1;
-	init_window(&window_1, 10);
-
-	/*
-	load_file(&window_1, "cpy2.c");
-	print(window_1);
-	FILE *fdd;
-	fdd = fopen("hello.txt", "w+");
+ * used

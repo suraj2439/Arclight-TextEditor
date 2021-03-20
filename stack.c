@@ -80,9 +80,13 @@ void free_stack(stack *st) {
 }
 
 
-void store_info(stack *st, char data_c, char operation, char freq, int x, int y) {
-	node *nn = (node*)malloc(sizeof(node));
-	if(isEmpty(*st)) {
+void store_info(stack *st, int pos_changed, char data_c, char operation, char freq, int x, int y) {
+	node tmp = peek(*st);
+	// if stack is empty or operation is different than prev operation or position is changed then
+	// add info as new node in stack
+	if(isEmpty(*st) || tmp.operation != operation || pos_changed) {
+		// malloc new node to store info
+		node *nn = (node*)malloc(sizeof(node));
 		if(operation == DEL_CHAR) {
 			nn->dta = (data*)malloc(sizeof(data));
 			nn->freq = 0;
@@ -103,47 +107,45 @@ void store_info(stack *st, char data_c, char operation, char freq, int x, int y)
                         return;
 		}
 	}
-	node tmp = peek(*st);
-	if(tmp.operation == DEL_CHAR) {
-		if( (tmp.final_pos.x == x) && (tmp.final_pos.y == y) ) {
-			int indx = tmp.freq % MAX_DATA_IN_ONE_NODE;
-			if(indx) {
-				((*st)->dta->arr)[indx++] = data_c;
-				(*st)->freq += 1;
-				((*st)->final_pos).y = y;
-				return;
-			}
-			else {
-				data *new = (data*)malloc(sizeof(data));
-				new->next = NULL;
-				(new->arr)[indx] = data_c;
-				new->next = (*st)->dta;
-				(*st)->dta = new;
-				(*st)->freq += 1;
-				((*st)->final_pos).y = y;
-				return;
 
-			}
+	if(tmp.operation == DEL_CHAR) {
+		int indx = tmp.freq % MAX_DATA_IN_ONE_NODE;
+		if(indx) {
+			((*st)->dta->arr)[indx++] = data_c;
+			(*st)->freq += 1;
+			((*st)->final_pos).x = x;
+			((*st)->final_pos).y = y;
+			return;
 		}
 		else {
-			nn->dta = (data*)malloc(sizeof(data));
-                        nn->freq = 0;
-                        (nn->dta->arr)[(nn->freq)++] = data_c;
-                        nn->operation = operation;
-                        (nn->final_pos).x = x;
-                        (nn->final_pos).y = y;
-                        push(st, nn);
+			data *new = (data*)malloc(sizeof(data));
+			new->next = NULL;
+			(new->arr)[indx] = data_c;
+			new->next = (*st)->dta;
+			(*st)->dta = new;
+			(*st)->freq += 1;
+			((*st)->final_pos).x = x;
+			((*st)->final_pos).y = y;
 			return;
 		}
 	}
 	else {
-		if( (tmp.final_pos.x == x) && (tmp.final_pos.y == y) ) {
+		if(! pos_changed) {
 			(*st)->freq += 1;
-			((*st)->final_pos).y = y;	
+			((*st)->final_pos).x = x;
+			((*st)->final_pos).y = y;
 		}
 	}
 }
 
+
+void undo(stack *st, win *w, int *line_no, int *position, FILE *fd_store_prev, FILE *fd_store_next, FILE *fd_main) {
+	node tmp = peek(*st);
+	switch(tmp.operation) {
+		case INSERT_CHAR:
+			del_from_pos(w, line_no, position, fd_store_prev, fd_store_next, fd_main);
+	}
+}
 
 int main() {
 	/*
