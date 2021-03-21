@@ -11,7 +11,7 @@
 // NOTE: line_size should be modified by caller of this function it is not modified in this fun
 void insert_at_pos(line *subline, int position, char data);
 
-void del_from_pos(win *w, int *lne_no, int *col_no, FILE *fd_store_prev, FILE *fd_store_next, FILE *fd_main);
+char del_from_pos(win *w, int *lne_no, int *col_no, FILE *fd_store_prev, FILE *fd_store_next, FILE *fd_main);
 
 // NOTE:- first line is 0th line
 void insert_new_line_at_pos(win *w, int *lne_no, int *col_no, FILE *fd_prev, FILE *fd_nxt, FILE *fd_main);

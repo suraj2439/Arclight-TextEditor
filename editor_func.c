@@ -43,9 +43,11 @@ void insert_at_pos(line *subline, int position, char data) {
 }
 
 
-
-void del_from_pos(win *w, int *lne_no, int *col_no, FILE *fd_store_prev, FILE *fd_store_next, FILE *fd_main) {
+// Use to delete one character from given position
+// RETURN: deleted character
+char del_from_pos(win *w, int *lne_no, int *col_no, FILE *fd_store_prev, FILE *fd_store_next, FILE *fd_main) {
 	int line_no = *lne_no, position = *col_no;
+	char data;
 	// if position not 0th position
 	if(position) {
 		// decrease col_no(used in gui)
@@ -61,9 +63,10 @@ void del_from_pos(win *w, int *lne_no, int *col_no, FILE *fd_store_prev, FILE *f
         	// move cursor(gap) at appropriate position
 		lne = move_cursor(lne, position);
 		// increase left boundary of gap buff to del char at given pos
+		data = lne->curr_line[lne->gap_left - 1];
 		lne->gap_left--;		//TODO decide what to do if only one character to remove now subline is empty
 		lne->gap_size++;
-		return;
+		return data;
 	}
 
 	// delete character from position 0
@@ -72,7 +75,7 @@ void del_from_pos(win *w, int *lne_no, int *col_no, FILE *fd_store_prev, FILE *f
 		if(line_no == 0) {
 			// check if line is present in filename_prev.tmp file
 			if(! check_prev_line_available(fd_store_prev))
-				return;
+				return '\n';
 
 			line tmp = w->head->line;
 			int tmp_line_size = w->head->line_size;
@@ -103,7 +106,7 @@ void del_from_pos(win *w, int *lne_no, int *col_no, FILE *fd_store_prev, FILE *f
 			// adjust col_no(used in gui)
 			*col_no = w->head->line_size;
 			w->head->line_size += tmp_line_size;
-			return;
+			return '\n';
 		}
 		// not first line
 		else {
@@ -159,12 +162,12 @@ void del_from_pos(win *w, int *lne_no, int *col_no, FILE *fd_store_prev, FILE *f
 			if(not_available) {
 				new_line->curr_line[0] = MAX_CHAR;
 				w->head[last].line_size = 0;
-				return;
+				return '\n';
 			}
 
 			// load next line from file and update line size
 			w->head[last].line_size = next_line_into_data_struct(new_line, extract_from_next, fd_store_next, fd_main);
-			return;
+			return '\n';
 		}
 
 	}

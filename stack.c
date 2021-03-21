@@ -4,6 +4,7 @@
 #define INSERT_CHAR	1
 #define DEL_CHAR	2
 #define DEL_LINE	3
+#define INSERT_NEW_LINE	4
 #define MAX_DATA_IN_ONE_NODE	10
 
 typedef struct data {
@@ -24,6 +25,7 @@ typedef struct node {
 } node;
 
 typedef node* stack;
+
 
 
 void init(stack *st) {
@@ -80,7 +82,7 @@ void free_stack(stack *st) {
 }
 
 
-void store_info(stack *st, int pos_changed, char data_c, char operation, char freq, int x, int y) {
+void store_info(stack *st, int pos_changed, char data_c, char operation, int x, int y) {
 	node tmp = peek(*st);
 	// if stack is empty or operation is different than prev operation or position is changed then
 	// add info as new node in stack
@@ -108,55 +110,110 @@ void store_info(stack *st, int pos_changed, char data_c, char operation, char fr
 		}
 	}
 
+	// if operation is del_char then data must be stored in 
+	// stack to undo whenever required
 	if(tmp.operation == DEL_CHAR) {
 		int indx = tmp.freq % MAX_DATA_IN_ONE_NODE;
 		if(indx) {
+			// fill data
 			((*st)->dta->arr)[indx++] = data_c;
+			// increase freq count
 			(*st)->freq += 1;
+			// update final position
 			((*st)->final_pos).x = x;
 			((*st)->final_pos).y = y;
 			return;
 		}
 		else {
+			// malloc new node to store data as size is reached to threshold
 			data *new = (data*)malloc(sizeof(data));
 			new->next = NULL;
+			// fill data
 			(new->arr)[indx] = data_c;
+			// adjust pointer(stack using linked list)
 			new->next = (*st)->dta;
 			(*st)->dta = new;
+			// increase freq by one
 			(*st)->freq += 1;
+			// change final position
 			((*st)->final_pos).x = x;
 			((*st)->final_pos).y = y;
 			return;
 		}
 	}
+	// for other operations 
 	else {
-		if(! pos_changed) {
-			(*st)->freq += 1;
-			((*st)->final_pos).x = x;
-			((*st)->final_pos).y = y;
-		}
+		// increase freq count
+		(*st)->freq += 1;
+		// update final position
+		((*st)->final_pos).x = x;
+		((*st)->final_pos).y = y;
 	}
 }
 
 
 void undo(stack *st, win *w, int *line_no, int *position, FILE *fd_store_prev, FILE *fd_store_next, FILE *fd_main) {
+	if(isEmpty(*st))
+		return;
 	node tmp = peek(*st);
+	// goto the position where last operation was performed
+	*line_no = (*st)->final_pos.x;
+	*position = (*st)->final_pos.y;
+
 	switch(tmp.operation) {
 		case INSERT_CHAR:
-			del_from_pos(w, line_no, position, fd_store_prev, fd_store_next, fd_main);
+			// undo
+			while( (*st)->freq-- )
+				del_from_pos(w, line_no, position, fd_store_prev, fd_store_next, fd_main);
+			pop(st);
+			break; 
+
+		case INSERT_NEW_LINE:
+                        // undo
+                        while( (*st)->freq-- )
+                                del_from_pos(w, line_no, position, fd_store_prev, fd_store_next, fd_main);
+                        pop(st);
+                        break;
+
+		case DEL_CHAR: {
+			while( (*st)->freq ) {
+				if( (*st)->freq % MAX_DATA_IN_ONE_NODE == 0) {
+                                        data *tmp = (*st)->dta;
+                                        (*st)->dta = (*st)->dta->next;
+                                        free(tmp);
+                                }
+				int indx =((*st)->freq-1) % MAX_DATA_IN_ONE_NODE;
+				char data = ((*st)->dta->arr)[indx];
+
+				int h_indx = head_index(*w, *line_no);
+				(w->head)[h_indx].line_size++;
+				insert_at_pos(&((w->head)[h_indx].line), (*position)++, data);
+				(*st)->freq--;
+			}
+			pop(st);
+			break;
+		}
+
+		case DEL_LINE:
+                        // undo
+                        while( (*st)->freq-- )
+                                insert_new_line_at_pos(w, line_no, position, fd_store_prev, fd_store_next, fd_main);
+                        pop(st);
+                        break;
+			
 	}
 }
 
+/*
 int main() {
-	/*
+
 	stack s;
 	init(&s);
 	push(&s, 5);
 	//push(&s, 9);
 	pop(&s);
 	printf("%d\n", pop(&s));
-*/
+
 	return 0;
 }
-
-
+*/
