@@ -5,8 +5,11 @@
 #define DEL_CHAR	2
 #define DEL_LINE	3
 #define INSERT_NEW_LINE	4
+<<<<<<< HEAD
 #define LOAD_NEXT_LINE	5
 #define LOAD_PREV_LINE	6
+=======
+>>>>>>> ac5280ee8b130e7d9f0090ce3ba06c5fac39cb60
 #define MAX_DATA_IN_ONE_NODE	10
 
 typedef struct data {
@@ -154,6 +157,7 @@ void store_info(stack *st, int pos_changed, char data_c, char operation, int x, 
 }
 
 
+<<<<<<< HEAD
 void undo(stack *st, win *w, int *line_no, int* win_line, int *position, FILE *fd_store_prev, FILE *fd_store_next, FILE *fd_main) {
 	if(isEmpty(*st))
 		return;
@@ -161,23 +165,41 @@ void undo(stack *st, win *w, int *line_no, int* win_line, int *position, FILE *f
 	int tmp_wl = *win_line;
 	// goto the position where last operation was performed
 	*win_line = (*st)->final_pos.x;
+=======
+void undo(stack *st, win *w, int *line_no, int *position, FILE *fd_store_prev, FILE *fd_store_next, FILE *fd_main) {
+	if(isEmpty(*st))
+		return;
+	node tmp = peek(*st);
+	// goto the position where last operation was performed
+	*line_no = (*st)->final_pos.x;
+>>>>>>> ac5280ee8b130e7d9f0090ce3ba06c5fac39cb60
 	*position = (*st)->final_pos.y;
 
 	switch(tmp.operation) {
 		case INSERT_CHAR:
 			// undo
 			while( (*st)->freq-- )
+<<<<<<< HEAD
 				del_from_pos(w, win_line, position, fd_store_prev, fd_store_next, fd_main);
 			pop(st);
 			*line_no += (*win_line - tmp_wl);
+=======
+				del_from_pos(w, line_no, position, fd_store_prev, fd_store_next, fd_main);
+			pop(st);
+>>>>>>> ac5280ee8b130e7d9f0090ce3ba06c5fac39cb60
 			break; 
 
 		case INSERT_NEW_LINE:
                         // undo
                         while( (*st)->freq-- )
+<<<<<<< HEAD
                                 del_from_pos(w, win_line, position, fd_store_prev, fd_store_next, fd_main);
                         pop(st);
 			*line_no += (*win_line - tmp_wl);
+=======
+                                del_from_pos(w, line_no, position, fd_store_prev, fd_store_next, fd_main);
+                        pop(st);
+>>>>>>> ac5280ee8b130e7d9f0090ce3ba06c5fac39cb60
                         break;
 
 		case DEL_CHAR: {
@@ -190,19 +212,27 @@ void undo(stack *st, win *w, int *line_no, int* win_line, int *position, FILE *f
 				int indx =((*st)->freq-1) % MAX_DATA_IN_ONE_NODE;
 				char data = ((*st)->dta->arr)[indx];
 
+<<<<<<< HEAD
 				int h_indx = head_index(*w, *win_line);
+=======
+				int h_indx = head_index(*w, *line_no);
+>>>>>>> ac5280ee8b130e7d9f0090ce3ba06c5fac39cb60
 				(w->head)[h_indx].line_size++;
 				insert_at_pos(&((w->head)[h_indx].line), (*position)++, data);
 				(*st)->freq--;
 			}
 			pop(st);
+<<<<<<< HEAD
 			*line_no += (*win_line - tmp_wl);
+=======
+>>>>>>> ac5280ee8b130e7d9f0090ce3ba06c5fac39cb60
 			break;
 		}
 
 		case DEL_LINE:
                         // undo
                         while( (*st)->freq-- )
+<<<<<<< HEAD
                                 insert_new_line_at_pos(w, win_line, position, fd_store_prev, fd_store_next, fd_main);
                         pop(st);
 			*line_no += (*win_line - tmp_wl);
@@ -223,17 +253,31 @@ void undo(stack *st, win *w, int *line_no, int* win_line, int *position, FILE *f
                         }
                         pop(st);
                         break;
+=======
+                                insert_new_line_at_pos(w, line_no, position, fd_store_prev, fd_store_next, fd_main);
+                        pop(st);
+                        break;
+			
+>>>>>>> ac5280ee8b130e7d9f0090ce3ba06c5fac39cb60
 	}
 }
 
 /*
 int main() {
+<<<<<<< HEAD
+=======
+
+>>>>>>> ac5280ee8b130e7d9f0090ce3ba06c5fac39cb60
 	stack s;
 	init(&s);
 	push(&s, 5);
 	//push(&s, 9);
 	pop(&s);
 	printf("%d\n", pop(&s));
+<<<<<<< HEAD
+=======
+
+>>>>>>> ac5280ee8b130e7d9f0090ce3ba06c5fac39cb60
 	return 0;
 }
 */
