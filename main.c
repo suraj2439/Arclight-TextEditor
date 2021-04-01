@@ -6,7 +6,7 @@
 #include "init_editor.h"
 #include "editor_func.h"
 #include "line.h"
-
+#include "stack.c"
 
 void print_loc(int x, int y) {
         move(20, 20);
@@ -104,6 +104,8 @@ int main() {
 	win window_1;
 	FILE *fd_store_prev, *fd_store_next, *fd_main;
 	init_window(&window_1, 5);
+	stack st;
+	init(&st);
 
 	fd_main = load_file(&window_1,"1.c");
 	fd_store_prev = fopen(".hi_pr.tmp", "w+");
@@ -118,12 +120,10 @@ int main() {
                 //print(window_1);
                 //printf("abc %d\n",window_1.head_indx);
                 //printf("\n");
-
 		a = 4, b = 0;
 		load_next_line(&window_1, fd_store_prev, fd_store_next, fd_main);
 		print(window_1);
 	        printf("\n");
-
 		del_from_pos(&window_1, &a, &b, fd_store_prev, fd_store_next, fd_main);
 		//load_next_line(&window_1, fd_store_prev, fd_store_next, fd_main);
 		//load_next_line(&window_1, fd_store_prev, fd_store_next, fd_main);
@@ -136,33 +136,27 @@ int main() {
 		del_from_pos(&window_1, &a, &b, fd_store_prev, fd_store_next, fd_main);
 		print(window_1);
                 printf("\n");
-
 		a= 0, b = 100;
                 del_from_pos(&window_1, &a, &b, fd_store_prev, fd_store_next, fd_main);
                 print(window_1);
                 printf("\n");
-
 		load_next_line(&window_1, fd_store_prev, fd_store_next, fd_main);
 		print(window_1);
 		//printf("abc %d\n",window_1.head_indx);
 		printf("\n");
 		exit(1);
-
 		load_prev_line(&window_1, fd_store_prev, fd_store_next);
                 print(window_1);
 		printf("abc %d\n",window_1.head_indx);
 		printf("\n");
-
 		load_next_line(&window_1, fd_store_prev, fd_store_next, fd_main);
                 print(window_1);
 		printf("abc %d\n",window_1.head_indx);
                 printf("\n");
-
 		load_next_line(&window_1, fd_store_prev, fd_store_next, fd_main);
                 print(window_1);
                 printf("abc %d\n",window_1.head_indx);
                 printf("\n");
-
 		load_next_line(&window_1, fd_store_prev, fd_store_next, fd_main);
                 print(window_1);
                 printf("abc %d\n",window_1.head_indx);
@@ -176,80 +170,119 @@ int main() {
         keypad(stdscr, true);
 
 	int ch;
-	int line_no = 0, col_no = 0;
+	int win_line = 0, win_col = 0, line_no = 0;
+	int pos_changed = 0;
 
 	print_page(window_1);
-	print_loc(line_no, col_no);
-	move(line_no, col_no);
+	print_loc(line_no, win_col);
+	move(line_no, win_col);
 	while(1) {
 		ch = getch();
 		switch(ch) {
 			case 'q':
 				endwin();
 				return 0;
+			case 'z':
+				undo(&st, &window_1, &line_no, &win_line, &win_col, fd_store_prev, fd_store_next, fd_main);
+				break;
 
 			case KEY_LEFT:
-				if(col_no)
-					col_no--;
-				break;
+				pos_changed = 1;
+	                        if(win_col)
+        	                        win_col--;
+                  	      	break;
 
 			case KEY_RIGHT:
-				if(col_no < (window_1.head)[head_index(window_1, line_no)].line_size)
-					col_no++;
-				break;
+				pos_changed = 1;
+	                        if(win_col < (window_1.head)[head_index(window_1, win_line)].line_size)
+        	                        win_col++;
+                	        break;
 
 			case KEY_DOWN:
-				if(line_no < window_1.tot_lines - 1) {
-					line_no++;
-					
-					int h_indx = head_index(window_1, line_no);
-					if(col_no > (window_1.head)[h_indx].line_size)
-						col_no = (window_1.head)[h_indx].line_size;
-				}
-				else {
-					load_next_line(&window_1, fd_store_prev, fd_store_next, fd_main);
-					
-					int h_indx = head_index(window_1, line_no);
-					if(col_no > (window_1.head)[h_indx].line_size)
-						col_no = (window_1.head)[h_indx].line_size;
-				}
-				break;
+				pos_changed = 1;
+                        	if(win_line < window_1.tot_lines - 1) {
+                                	win_line++;
+                                	line_no++;
+
+                                	int h_indx = head_index(window_1, win_line);
+                               		if(win_col > (window_1.head)[h_indx].line_size)
+                       	        	        win_col = (window_1.head)[h_indx].line_size;
+                	        }
+        	                else {
+	                                int check = load_next_line(&window_1, fd_store_prev, fd_store_next, fd_main);
+                                	if(check == SUCCESS) {
+                        	                line_no++;
+
+                	                	int h_indx = head_index(window_1, win_line);
+        	                        	if(win_col > (window_1.head)[h_indx].line_size)
+	                                        	win_col = (window_1.head)[h_indx].line_size;
+
+                                		store_info(&st, 0, ch, LOAD_NEXT_LINE, win_line, win_col);
+					}
+                        	}
+                        	break;
 
 			case KEY_UP:
-				if(line_no > 0) {
-					line_no--;
-					
-					int h_indx = head_index(window_1, line_no);
-                                        if(col_no > (window_1.head)[h_indx].line_size)
-                                                col_no = (window_1.head)[h_indx].line_size;
+				pos_changed = 1;
+                        	if(win_line > 0) {
+                	                win_line--;
+        	                        line_no--;
+	
+        	                        int h_indx = head_index(window_1, win_line);
+	                                if(win_col > (window_1.head)[h_indx].line_size)
+                                	        win_col = (window_1.head)[h_indx].line_size;
 
-				}
-				else {
-					load_prev_line(&window_1, fd_store_prev, fd_store_next);
+                        	}
+                        	else {
+                                	int check = load_prev_line(&window_1, fd_store_prev, fd_store_next);
+                                	if(check == SUCCESS) {
+                                        	line_no--;
 
-					int h_indx = head_index(window_1, line_no);
-					if(col_no > (window_1.head)[h_indx].line_size)
-                                                col_no = (window_1.head)[h_indx].line_size;
-				}
-				break;
+                                		int h_indx = head_index(window_1, win_line);
+                                		if(win_col > (window_1.head)[h_indx].line_size)
+                                	 	       win_col = (window_1.head)[h_indx].line_size;
 
-			case KEY_BACKSPACE:
-				del_from_pos(&window_1, &line_no, &col_no, fd_store_prev, fd_store_next, fd_main);
-				break;
+						store_info(&st, 0, ch, LOAD_PREV_LINE, win_line, win_col);
+					}
+                        	}
+                        	break;
+
+			case KEY_BACKSPACE: {
+        	                // at start of file, do nothing
+	                        if(line_no == 0 && win_col == 0)
+                        	        continue;
+
+                	        char operation = DEL_CHAR;
+        	                if(win_col == 0) {
+	                                operation = DEL_LINE;
+                                	line_no--;
+                        	}
+                        	char data = del_from_pos(&window_1, &win_line, &win_col, fd_store_prev, fd_store_next, fd_main);
+                        	store_info(&st, pos_changed, data, operation, win_line, win_col);
+                	        pos_changed = 0;
+	                        break;
+        	        }
+
 
 			case '\n':
-				insert_new_line_at_pos(&window_1, &line_no, &col_no, fd_store_prev, fd_store_next, fd_main);
-				break;
-			
-			default:{
-				int h_indx = head_index(window_1, line_no);
-				(window_1.head)[h_indx].line_size++;
-				insert_at_pos(&((window_1.head)[h_indx].line), col_no++, ch);
-				}
+	                        line_no++;
+                        	insert_new_line_at_pos(&window_1, &win_line, &win_col, fd_store_prev, fd_store_next, fd_main);
+        	                store_info(&st, pos_changed, ch, INSERT_NEW_LINE, win_line, win_col);
+                	        pos_changed = 0;
+	                        break;
+
+			default: {
+                        	int h_indx = head_index(window_1, win_line);
+                        	(window_1.head)[h_indx].line_size++;
+                        	insert_at_pos(&((window_1.head)[h_indx].line), win_col++, ch);
+                        	store_info(&st, pos_changed, ch, INSERT_CHAR, win_line, win_col);
+                        	pos_changed = 0;
+			}
 		}
+
 		print_page(window_1);
-		print_loc(line_no, col_no);
-		move(line_no, col_no);
+		print_loc(line_no, win_col);
+		move(win_line, win_col);
 	}
 
 	return 0;

@@ -50,11 +50,12 @@ int check_prev_line_available(FILE *fd_store_prev);
  * fd_store_prev : file descripter to store line which is just to be removed from top of ADT
  * fd_store_next : file descripter to store line which is just to be removed from bottom of ADT
  * fd_get   : file descripter to pointing in main file.
+ * RETURN: 0 for success, 1 for failure
  */
-void load_next_line(win *w, FILE *fd_store_prev, FILE *fd_store_next, FILE *fd_main);
+int load_next_line(win *w, FILE *fd_store_prev, FILE *fd_store_next, FILE *fd_main);
 
 
-void load_prev_line(win *w, FILE *fd_store_prev, FILE *fd_store_next);
+int load_prev_line(win *w, FILE *fd_store_prev, FILE *fd_store_next);
 
 // use to return head_index
 int head_index(win w, int line_no);

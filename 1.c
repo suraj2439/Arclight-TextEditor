@@ -196,6 +196,9 @@ void free_rem_lines(line* lne) {
 void load_next_line(win *w, FILE *fdd) {
 	node_l* tmp;
 	tmp = w->head;
+	// move head to next so that in circular array 
+	// prev head will act as last line
+	// in this case tmp is acting as last line
 	w->head = w->head->next;
 
 	line *data_line = &tmp->line;
@@ -208,10 +211,6 @@ void load_next_line(win *w, FILE *fdd) {
 			indx = 0;
 		}
 		data = data_line->curr_line[indx++];
-		if(indx == 0) {
-			printf("%c ", data);
-			exit(1);
-		}
 	}
 	/*to store last \n at the end of line*/
 	fputc('\n', fdd);

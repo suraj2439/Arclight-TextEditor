@@ -1,6 +1,9 @@
 #ifndef EDITOR_STRUCTS_H
 #define EDITOR_STRUCTS_H
 
+#define SUCCESS			0
+#define FAILURE			1
+#define TOT_LINES_IN_WINDOW	20
 #define MAX_CHAR_IN_SUBLINE	5
 #define MAX_CHAR 		-128
 #define BACKSPACE		8

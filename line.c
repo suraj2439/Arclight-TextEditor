@@ -172,14 +172,15 @@ int check_prev_line_available(FILE *fd_store_prev) {
  * fd_store_prev : file descripter to store line which is just to be removed from top of ADT
  * fd_store_next : file descripter to store line which is just to be removed from bottom of ADT
  * fd_get   : file descripter to pointing in main file.
+ * RETURN: 0 for success, 1 for failure(if next line not available)
  */
-void load_next_line(win *w, FILE *fd_store_prev, FILE *fd_store_next, FILE *fd_main) {
+int load_next_line(win *w, FILE *fd_store_prev, FILE *fd_store_next, FILE *fd_main) {
 	char ch;
 	int extract_from_next = 0;
 	int check = check_next_line_available(fd_store_next, fd_main);
 	// next line not available
 	if(! check)
-		return;
+		return FAILURE;
 	// available in next_tmp_file
 	if(check == 1)
 		extract_from_next = 1;
@@ -187,7 +188,7 @@ void load_next_line(win *w, FILE *fd_store_prev, FILE *fd_store_next, FILE *fd_m
 	/*extract first line of window from ADT to tmp file*/
         if(w->head->line.curr_line[0] != MAX_CHAR)
                 extract_line(w->head, fd_store_prev);
-	else return;
+	else return FAILURE;	//TODO maybe this case will not arise
 
 	// free mallocated sublines corresponding to data_line in ADT
 	free_line(&w->head->line);	//TODO: try to do without free
@@ -213,14 +214,14 @@ void load_next_line(win *w, FILE *fd_store_prev, FILE *fd_store_next, FILE *fd_m
 		w->head -= (w->tot_lines-1);
 	else w->head++;
 
-	return;
+	return SUCCESS;
 }
 
 
-void load_prev_line(win *w, FILE *fd_store_prev, FILE *fd_store_next) {
+int load_prev_line(win *w, FILE *fd_store_prev, FILE *fd_store_next) {
 	// check previous line is available or not
 	if(! check_prev_line_available(fd_store_prev))
-		return;
+		return FAILURE;
 
 	// point head pointer to previous line
 	if(w->head_indx == 0) {
@@ -249,7 +250,7 @@ void load_prev_line(win *w, FILE *fd_store_prev, FILE *fd_store_next) {
         // load prev line from file
         line *lne = &(w->head)->line;
 	w->head->line_size = prev_line_into_data_struct(lne, fd_store_prev);
-	return;
+	return SUCCESS;
 }
 
 
