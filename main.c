@@ -170,11 +170,7 @@ int main() {
         keypad(stdscr, true);
 
 	int ch;
-<<<<<<< HEAD
 	int win_line = 0, win_col = 0, line_no = 0;
-=======
-	int line_no = 0, col_no = 0;
->>>>>>> ac5280ee8b130e7d9f0090ce3ba06c5fac39cb60
 	int pos_changed = 0;
 
 	print_page(window_1);
@@ -187,16 +183,11 @@ int main() {
 				endwin();
 				return 0;
 			case 'z':
-<<<<<<< HEAD
 				undo(&st, &window_1, &line_no, &win_line, &win_col, fd_store_prev, fd_store_next, fd_main);
-=======
-				undo(&st, &window_1, &line_no, &col_no, fd_store_prev, fd_store_next, fd_main);
->>>>>>> ac5280ee8b130e7d9f0090ce3ba06c5fac39cb60
 				break;
 
 			case KEY_LEFT:
 				pos_changed = 1;
-<<<<<<< HEAD
 	                        if(win_col)
         	                        win_col--;
                   	      	break;
@@ -286,80 +277,6 @@ int main() {
                         	insert_at_pos(&((window_1.head)[h_indx].line), win_col++, ch);
                         	store_info(&st, pos_changed, ch, INSERT_CHAR, win_line, win_col);
                         	pos_changed = 0;
-=======
-				if(col_no)
-					col_no--;
-				break;
-
-			case KEY_RIGHT:
-				pos_changed = 1;
-				if(col_no < (window_1.head)[head_index(window_1, line_no)].line_size)
-					col_no++;
-				break;
-
-			case KEY_DOWN:
-				pos_changed = 1;
-				if(line_no < window_1.tot_lines - 1) {
-					line_no++;
-					
-					int h_indx = head_index(window_1, line_no);
-					if(col_no > (window_1.head)[h_indx].line_size)
-						col_no = (window_1.head)[h_indx].line_size;
-				}
-				else {
-					load_next_line(&window_1, fd_store_prev, fd_store_next, fd_main);
-					
-					int h_indx = head_index(window_1, line_no);
-					if(col_no > (window_1.head)[h_indx].line_size)
-						col_no = (window_1.head)[h_indx].line_size;
-				}
-				break;
-
-			case KEY_UP:
-				pos_changed = 1;
-				if(line_no > 0) {
-					line_no--;
-	
-					int h_indx = head_index(window_1, line_no);
-                                        if(col_no > (window_1.head)[h_indx].line_size)
-                                                col_no = (window_1.head)[h_indx].line_size;
-
-				}
-				else {
-					load_prev_line(&window_1, fd_store_prev, fd_store_next);
-
-					int h_indx = head_index(window_1, line_no);
-					if(col_no > (window_1.head)[h_indx].line_size)
-                                                col_no = (window_1.head)[h_indx].line_size;
-				}
-				break;
-
-			case KEY_BACKSPACE: {
-				if(line_no == 0 && col_no == 0)
-					continue;
-
-				char operation = DEL_CHAR;
-				if(col_no == 0)
-					operation = DEL_LINE;
-				char data = del_from_pos(&window_1, &line_no, &col_no, fd_store_prev, fd_store_next, fd_main);
-				store_info(&st, pos_changed, data, operation, line_no, col_no);
-                                pos_changed = 0;
-				break;
-			}
-
-			case '\n':
-				insert_new_line_at_pos(&window_1, &line_no, &col_no, fd_store_prev, fd_store_next, fd_main);
-				store_info(&st, pos_changed, ch, INSERT_NEW_LINE, line_no, col_no);
-                                pos_changed = 0;
-				break;
-			
-			default: {
-				int h_indx = head_index(window_1, line_no);
-				(window_1.head)[h_indx].line_size++;
-				insert_at_pos(&((window_1.head)[h_indx].line), col_no++, ch);
-				store_info(&st, pos_changed, ch, INSERT_CHAR, line_no, col_no);
-				pos_changed = 0;
->>>>>>> ac5280ee8b130e7d9f0090ce3ba06c5fac39cb60
 			}
 		}
 

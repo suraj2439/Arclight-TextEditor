@@ -1,8 +1,5 @@
-<<<<<<< HEAD
 #include <stdio.h>
 #include <stdlib.h>
-d#define MAX_CHAR_IN_LINE	10
+#define MAX_CHAR_IN_LINE	10
 typedef struct line {
         char *curr_line;
-=======
->>>>>>> ac5280ee8b130e7d9f0090ce3ba06c5fac39cb60
