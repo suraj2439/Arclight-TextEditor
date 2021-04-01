@@ -1,10 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#define MAX_CHAR_IN_LINE	10
-
-
-
-
-
-
-
+d#define MAX_CHAR_IN_LINE	10
+typedef struct line {
+        char *curr_line;
