@@ -8,6 +8,8 @@
 #define MAX_CHAR 		-128
 #define BACKSPACE		8
 #define DELETE			127
+#define TAB_SPACE		4
+#define SHORTCUT_KEY		-5
 
 typedef struct line {
         char *curr_line;

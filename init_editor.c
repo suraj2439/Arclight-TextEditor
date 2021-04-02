@@ -36,8 +36,13 @@ FILE* load_file(win *w, char *filename) {
         	}
 		ungetc(c, fd_get);
 
-		while((c = fgetc(fd_get)) != '\n')
-                	insert_at_pos(lne, indx++, c);
+		while((c = fgetc(fd_get)) != '\n') {
+			if(c == '\t')
+				for(int i = 0; i < TAB_SPACE; i++)
+					insert_at_pos(lne, indx++, ' ');
+			else 
+                		insert_at_pos(lne, indx++, c);
+		}
 		
 		(w->head)[i].line_size = indx;	// size of total line
 	}

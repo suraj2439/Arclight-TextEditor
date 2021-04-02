@@ -4,27 +4,32 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.9~svn20110310	//
-BACKSPACE	editor_structs.h	7;"	d
-DELETE	editor_structs.h	8;"	d
+BACKSPACE	editor_structs.h	9;"	d
+DELETE	editor_structs.h	10;"	d
 DEL_CHAR	stack.c	5;"	d	file:
 DEL_LINE	stack.c	6;"	d	file:
 EDITOR_FUNC_H	editor_func.h	2;"	d
 EDITOR_STRUCTS_H	editor_structs.h	2;"	d
+FAILURE	editor_structs.h	5;"	d
 GAP_BUFFER_H	gap_buffer.h	2;"	d
 INIT_EDITOR_H	init_editor.h	2;"	d
 INSERT_CHAR	stack.c	4;"	d	file:
 INSERT_NEW_LINE	stack.c	7;"	d	file:
 LINE_H	line.h	2;"	d
-MAX_CHAR	editor_structs.h	6;"	d
-MAX_CHAR_IN_LINE	1.c	3;"	d	file:
-MAX_CHAR_IN_SUBLINE	editor_structs.h	5;"	d
-MAX_DATA_IN_ONE_NODE	stack.c	8;"	d	file:
-TOT_LINES_IN_WINDOW	editor_structs.h	4;"	d
+LOAD_NEXT_LINE	stack.c	8;"	d	file:
+LOAD_PREV_LINE	stack.c	9;"	d	file:
+MAX_CHAR	editor_structs.h	8;"	d
+MAX_CHAR_IN_SUBLINE	editor_structs.h	7;"	d
+MAX_DATA_IN_ONE_NODE	stack.c	10;"	d	file:
+SHORTCUT_KEY	editor_structs.h	12;"	d
+SUCCESS	editor_structs.h	4;"	d
+TAB_SPACE	editor_structs.h	11;"	d
+TOT_LINES_IN_WINDOW	editor_structs.h	6;"	d
 arr	stack.c	/^	char arr[MAX_DATA_IN_ONE_NODE];$/;"	m	struct:data	file:
 check_next_line_available	line.c	/^int check_next_line_available(FILE *fd_store_next, FILE *fd_main) {$/;"	f
 check_prev_line_available	line.c	/^int check_prev_line_available(FILE *fd_store_prev) {$/;"	f
-col_ptr	1.c	/^	int row_ptr, col_ptr;$/;"	m	struct:win	file:
-curr_line	1.c	/^        char *curr_line;$/;"	m	struct:line	file:
+check_shortcut_key	main.c	/^int check_shortcut_key(int *ch, int *move) {$/;"	f
+createNode	1.c	/^struct node* createNode(int data){       \/\/function which initializes a new node$/;"	f
 curr_line	editor_structs.h	/^        char *curr_line;$/;"	m	struct:line
 data	stack.c	/^typedef struct data {$/;"	s	file:
 data	stack.c	/^} data;$/;"	t	typeref:struct:data	file:
@@ -33,52 +38,41 @@ dta	stack.c	/^	data *dta;$/;"	m	struct:node	file:
 extract_line	line.c	/^void extract_line(node_l *tmp, FILE *fd_store) {$/;"	f
 final_pos	stack.c	/^	position final_pos;$/;"	m	struct:node	file:
 free_line	line.c	/^void free_line(line* lne) {$/;"	f
-free_rem_lines	1.c	/^void free_rem_lines(line* lne) {$/;"	f
 free_stack	stack.c	/^void free_stack(stack *st) {$/;"	f
 freq	stack.c	/^	char operation, freq;$/;"	m	struct:node	file:
 gap_left	editor_structs.h	/^	int gap_left, gap_right;$/;"	m	struct:line
 gap_right	editor_structs.h	/^	int gap_left, gap_right;$/;"	m	struct:line
 gap_size	editor_structs.h	/^	int gap_size;$/;"	m	struct:line
-head	1.c	/^	node_l *head;$/;"	m	struct:win	file:
 head	editor_structs.h	/^	node_l *head;$/;"	m	struct:win
 head_index	line.c	/^int head_index(win w, int line_no) {	\/\/TODO: use in print fun$/;"	f
 head_indx	editor_structs.h	/^	int tot_lines, head_indx;$/;"	m	struct:win
+inOrderTraversal	1.c	/^void inOrderTraversal(struct node* current){  \/\/recursive code to print in-order$/;"	f
 init	stack.c	/^void init(stack *st) {$/;"	f
 init_gap_buff	gap_buffer.c	/^void init_gap_buff(line *lne) {$/;"	f
-init_line	1.c	/^line init_line() {$/;"	f
-init_window	1.c	/^void init_window(win *w, int tot_lines) {$/;"	f
 init_window	init_editor.c	/^void init_window(win *w, int tot_lines) {$/;"	f
-insertBegin	1.c	/^void insertBegin(node_l** start, line line) {$/;"	f
+insertNode	1.c	/^struct node* insertNode(struct node* current, int data)    \/\/inserts a node in BST$/;"	f
 insert_at_pos	editor_func.c	/^void insert_at_pos(line *subline, int position, char data) {$/;"	f
 insert_new_line_at_pos	editor_func.c	/^void insert_new_line_at_pos(win *w, int *lne_no, int *col_no, FILE *fd_prev, FILE *fd_nxt, FILE *fd_main) {$/;"	f
 isEmpty	stack.c	/^int isEmpty(stack st) {$/;"	f
-line	1.c	/^	line line;$/;"	m	struct:node_l	file:
-line	1.c	/^typedef struct line {$/;"	s	file:
-line	1.c	/^} line;$/;"	t	typeref:struct:line	file:
+left	1.c	/^	struct node* left;$/;"	m	struct:node	typeref:struct:node::node	file:
 line	editor_structs.h	/^	line line;$/;"	m	struct:node_l
 line	editor_structs.h	/^typedef struct line {$/;"	s
 line	editor_structs.h	/^} line;$/;"	t	typeref:struct:line
 line_size	editor_structs.h	/^	int line_size;$/;"	m	struct:node_l
-load_file	1.c	/^FILE* load_file(win *w, char *filename) {$/;"	f
 load_file	init_editor.c	/^FILE* load_file(win *w, char *filename) {$/;"	f
-load_next_line	1.c	/^void load_next_line(win *w, FILE *fdd) {$/;"	f
-load_next_line	line.c	/^void load_next_line(win *w, FILE *fd_store_prev, FILE *fd_store_next, FILE *fd_main) {$/;"	f
-load_prev_line	line.c	/^void load_prev_line(win *w, FILE *fd_store_prev, FILE *fd_store_next) {$/;"	f
-main	1.c	/^int main() {$/;"	f
+load_next_line	line.c	/^int load_next_line(win *w, FILE *fd_store_prev, FILE *fd_store_next, FILE *fd_main) {$/;"	f
+load_prev_line	line.c	/^int load_prev_line(win *w, FILE *fd_store_prev, FILE *fd_store_next) {$/;"	f
+main	1.c	/^int main(){$/;"	f
 main	main.c	/^int main() {$/;"	f
 move_cursor	gap_buffer.c	/^line* move_cursor(line *subline, int position) {$/;"	f
 move_gap_left	gap_buffer.c	/^void move_gap_left(line *lne, int position) {$/;"	f
 move_gap_right	gap_buffer.c	/^void move_gap_right(line *lne, int position) {$/;"	f
-next	1.c	/^	struct node_l* next;$/;"	m	struct:node_l	typeref:struct:node_l::node_l	file:
 next	stack.c	/^	struct data *next;$/;"	m	struct:data	typeref:struct:data::data	file:
 next	stack.c	/^	struct node *next;$/;"	m	struct:node	typeref:struct:node::node	file:
-next_buff	1.c	/^	struct win *next_buff, *prev_buff;$/;"	m	struct:win	typeref:struct:win::win	file:
-next_buff_load_rem	1.c	/^	int next_buff_load_rem, prev_buff_load_rem;$/;"	m	struct:win	file:
 next_line_into_data_struct	line.c	/^int next_line_into_data_struct(line *lne, int extract_from_next, FILE *fd_store_next, FILE *fd_main) {$/;"	f
+node	1.c	/^struct node              \/\/ Structure defined for each node$/;"	s	file:
 node	stack.c	/^typedef struct node {$/;"	s	file:
 node	stack.c	/^} node;$/;"	t	typeref:struct:node	file:
-node_l	1.c	/^typedef struct node_l { $/;"	s	file:
-node_l	1.c	/^} node_l;$/;"	t	typeref:struct:node_l	file:
 node_l	editor_structs.h	/^typedef struct node_l { $/;"	s
 node_l	editor_structs.h	/^} node_l;$/;"	t	typeref:struct:node_l
 operation	stack.c	/^	char operation, freq;$/;"	m	struct:node	file:
@@ -86,26 +80,19 @@ peek	stack.c	/^node peek(stack st) {$/;"	f
 pop	stack.c	/^node pop(stack *st) {$/;"	f
 position	stack.c	/^typedef struct position {$/;"	s	file:
 position	stack.c	/^} position;$/;"	t	typeref:struct:position	file:
-prev	1.c	/^	struct node_l* prev;$/;"	m	struct:node_l	typeref:struct:node_l::node_l	file:
-prev_buff	1.c	/^	struct win *next_buff, *prev_buff;$/;"	m	struct:win	typeref:struct:win::	file:
-prev_buff_load_rem	1.c	/^	int next_buff_load_rem, prev_buff_load_rem;$/;"	m	struct:win	file:
 prev_line_into_data_struct	line.c	/^int prev_line_into_data_struct(line *lne, FILE *fd_store_prev) {$/;"	f
-print	1.c	/^void print(win w) {$/;"	f
 print	main.c	/^void print(win w) {$/;"	f
 print_debug	main.c	/^void print_debug(int x, int y) {$/;"	f
 print_loc	main.c	/^void print_loc(int x, int y) {$/;"	f
 print_page	main.c	/^void print_page(win w) {$/;"	f
 push	stack.c	/^void push(stack *st, node *nn) {$/;"	f
-rem_line	1.c	/^        struct line *rem_line;$/;"	m	struct:line	typeref:struct:line::line	file:
 rem_line	editor_structs.h	/^        struct line *rem_line;$/;"	m	struct:line	typeref:struct:line::line
-row_ptr	1.c	/^	int row_ptr, col_ptr;$/;"	m	struct:win	file:
+right	1.c	/^        struct node* right;$/;"	m	struct:node	typeref:struct:node::node	file:
 stack	stack.c	/^typedef node* stack;$/;"	t	file:
 store_info	stack.c	/^void store_info(stack *st, int pos_changed, char data_c, char operation, int x, int y) {$/;"	f
-tot_lines	1.c	/^	int tot_lines;$/;"	m	struct:win	file:
 tot_lines	editor_structs.h	/^	int tot_lines, head_indx;$/;"	m	struct:win
-undo	stack.c	/^void undo(stack *st, win *w, int *line_no, int *position, FILE *fd_store_prev, FILE *fd_store_next, FILE *fd_main) {$/;"	f
-win	1.c	/^typedef struct win {$/;"	s	file:
-win	1.c	/^} win;$/;"	t	typeref:struct:win	file:
+undo	stack.c	/^void undo(stack *st, win *w, int *line_no, int* win_line, int *position, FILE *fd_store_prev, FILE *fd_store_next, FILE *fd_main) {$/;"	f
+value	1.c	/^	int value;$/;"	m	struct:node	file:
 win	editor_structs.h	/^typedef struct win {$/;"	s
 win	editor_structs.h	/^} win;$/;"	t	typeref:struct:win
 x	stack.c	/^	int x, y;$/;"	m	struct:position	file:

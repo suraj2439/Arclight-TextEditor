@@ -7,6 +7,7 @@
 #include "editor_func.h"
 #include "line.h"
 #include "stack.c"
+#include "features.h"
 
 void print_loc(int x, int y) {
         move(20, 20);
@@ -14,9 +15,8 @@ void print_loc(int x, int y) {
 }
 
 void print_debug(int x, int y) {
-        mvprintw(15, 60, "k: %d b: %d", x, y);
+        mvprintw(25, 60, "k: %d b: %d", x, y);
 }
-
 
 
 /*use to print contents of ADT - for testing*/
@@ -40,6 +40,9 @@ void print_page(win w) {
 		move(i, 0);
                 clrtoeol();
 		int col = 0;
+	
+		// 3(orange), 15(white), 9(red), 10(light_green), 11(yerllow), 21(dark blue), 39(light_blue)
+
                 while(1) {
                         if(lne->gap_size != 0 && indx == lne->gap_left)
 				indx = lne->gap_right + 1;
@@ -54,7 +57,9 @@ void print_page(win w) {
                         }
 			
 			c = lne->curr_line[indx++];
+			attron(COLOR_PAIR(YELLOW));
 			mvaddch(i, col++, c);
+			attroff(COLOR_PAIR(YELLOW));
                 }
         }
 	return;
@@ -99,18 +104,23 @@ void print(win w) {
 
 
 
-
 int main() {
 	win window_1;
 	FILE *fd_store_prev, *fd_store_next, *fd_main;
-	init_window(&window_1, 5);
+	init_window(&window_1, TOT_LINES_IN_WINDOW);
 	stack st;
 	init(&st);
 
 	fd_main = load_file(&window_1,"1.c");
 	fd_store_prev = fopen(".hi_pr.tmp", "w+");
         fd_store_next = fopen(".hi_nxt.tmp", "w+");
-
+	
+	char **shortcut_key = init_shortcut_keys();
+/*	
+	for(int i = 0; shortcut_key[4][i] != 0; i++)
+		printf("%c", shortcut_key[4][i]);
+	return 0;
+*/	
 	/*
 	print(window_1);
 	printf("\n");
@@ -168,6 +178,7 @@ int main() {
         initscr();
         noecho();
         keypad(stdscr, true);
+	init_colors();
 
 	int ch;
 	int win_line = 0, win_col = 0, line_no = 0;
@@ -178,6 +189,9 @@ int main() {
 	move(line_no, win_col);
 	while(1) {
 		ch = getch();
+
+		int move_left = 0;
+		int sk_index = shortcut_key_indx(&ch, &move_left);
 		switch(ch) {
 			case 'q':
 				endwin();
@@ -270,6 +284,48 @@ int main() {
         	                store_info(&st, pos_changed, ch, INSERT_NEW_LINE, win_line, win_col);
                 	        pos_changed = 0;
 	                        break;
+			
+			case '\t': {
+				int h_indx = head_index(window_1, win_line);
+                                for(int i = 0; i < TAB_SPACE; i++) {
+                                        (window_1.head)[h_indx].line_size++;
+                                        insert_at_pos(&((window_1.head)[h_indx].line), win_col++, ' ');
+                                        store_info(&st, pos_changed, ch, INSERT_CHAR, win_line, win_col);
+                                        if(pos_changed)
+                                                pos_changed = 0;
+                                }
+				break;
+			}
+
+
+			case SHORTCUT_KEY: {
+				for(int i = 0; shortcut_key[sk_index][i] != '\0'; i++) {
+					int h_indx = head_index(window_1, win_line);
+
+					if(shortcut_key[sk_index][i] == '\n') {
+						line_no++;
+		                                insert_new_line_at_pos(&window_1, &win_line, 
+								&win_col, fd_store_prev, fd_store_next, fd_main);
+                		                store_info(&st, pos_changed, ch, INSERT_NEW_LINE, win_line, win_col);
+					}
+					else {
+						(window_1.head)[h_indx].line_size++;
+	                                	insert_at_pos(&((window_1.head)[h_indx].line), win_col++, shortcut_key[sk_index][i]);
+        	                        	store_info(&st, pos_changed, ch, INSERT_CHAR, win_line, win_col);
+					}
+					if(pos_changed)
+						pos_changed = 0;
+				}
+				for(int i = 0; i < move_left; i++) {
+                                        win_col--;
+					if(win_col < 0) {
+						line_no--;
+						win_line--;
+						win_col = (window_1.head[head_index(window_1, win_line)]).line_size;
+					}
+				}
+				break;
+			}
 
 			default: {
                         	int h_indx = head_index(window_1, win_line);

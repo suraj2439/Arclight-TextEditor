@@ -87,8 +87,8 @@ int next_line_into_data_struct(line *lne, int extract_from_next, FILE *fd_store_
                         c = fgetc(fd_store_next);
                         if(c != '\n') {
                                 // insert at position 0 because data is extracted in reverse passion
-                                insert_at_pos(lne, 0, c);
-                                count++;
+				insert_at_pos(lne, 0, c);
+				count++;
                         }
                         else return count;
                 }
@@ -101,7 +101,10 @@ int next_line_into_data_struct(line *lne, int extract_from_next, FILE *fd_store_
                 int indx = 0;
                 // insert till end of line
                 while((c = fgetc(fd_main)) != '\n') {
-                        insert_at_pos(lne, indx++, c);
+			if(c == '\t')
+				for(int i = 0; i < TAB_SPACE; i++)
+					insert_at_pos(lne, indx++, ' ');
+			else insert_at_pos(lne, indx++, c);
                 }
                 return indx;
         }
@@ -199,7 +202,7 @@ int load_next_line(win *w, FILE *fd_store_prev, FILE *fd_store_next, FILE *fd_ma
 	// init gap buffer of new line
 	init_gap_buff(&w->head->line);
 	// init line size
-	w->head->line_size = 0;		//TODO don changed
+	w->head->line_size = 0;
 
 	// load next line from file
 	line *lne = &(w->head)->line;
@@ -210,7 +213,7 @@ int load_next_line(win *w, FILE *fd_store_prev, FILE *fd_store_next, FILE *fd_ma
 
 	w->head_indx = (w->head_indx + 1) % w->tot_lines;
 
-	if(w->head_indx == 0)	// TODO head_indx is sufficient to show circular array
+	if(w->head_indx == 0)
 		w->head -= (w->tot_lines-1);
 	else w->head++;
 
