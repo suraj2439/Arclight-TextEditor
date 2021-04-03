@@ -1,5 +1,5 @@
-cc -c main.c init_editor.c editor_func.c gap_buffer.c line.c features.c
-cc main.o init_editor.o editor_func.o gap_buffer.o line.o features.o -lncurses
-rm main.o init_editor.o editor_func.o gap_buffer.o line.o features.o
+cc -c main.c init_editor.c editor_func.c gap_buffer.c line.c features.c trie.c
+cc main.o init_editor.o editor_func.o gap_buffer.o line.o features.o trie.o -lncurses
+rm main.o init_editor.o editor_func.o gap_buffer.o line.o features.o trie.o
 ./a.out
 rm a.out

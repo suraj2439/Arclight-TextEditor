@@ -10,20 +10,25 @@
 #include "features.h"
 
 void print_loc(int x, int y) {
-        move(20, 20);
-        mvprintw(10, 30, "x: %d y: %d", x, y);
+        mvprintw(0, 90, "x: %d y: %d", x, y);
 }
 
 void print_debug(int x, int y) {
-        mvprintw(25, 60, "k: %d b: %d", x, y);
+        mvprintw(1, 90, "k: %d b: %d", x, y);
 }
 
 
 /*use to print contents of ADT - for testing*/
-void print_page(win w) {
+void print_page(win w, TrieNode *keyword) {
 	line *lne;
 	int h_indx, line_no;
+	char word_arr[100];
 	for(int i = 0; i < w.tot_lines; i++) {
+		// for keyword coloring
+		int windx = 0;
+		char comment = 0;
+		char color = WHITE;
+
 		h_indx = i;
 		// circular array
 		if(h_indx + w.head_indx >= w.tot_lines)
@@ -43,13 +48,15 @@ void print_page(win w) {
 	
 		// 3(orange), 15(white), 9(red), 10(light_green), 11(yerllow), 21(dark blue), 39(light_blue)
 
+		int brk = 0;
                 while(1) {
                         if(lne->gap_size != 0 && indx == lne->gap_left)
 				indx = lne->gap_right + 1;
 			if(indx == MAX_CHAR_IN_SUBLINE) {
 				if(lne->rem_line == NULL) {
+					brk = 1;
+					goto LABEL;
 					// new line
-					break;
 				}
                                 lne = lne->rem_line;
                                 indx = 0;
@@ -57,9 +64,40 @@ void print_page(win w) {
                         }
 			
 			c = lne->curr_line[indx++];
-			attron(COLOR_PAIR(YELLOW));
-			mvaddch(i, col++, c);
-			attroff(COLOR_PAIR(YELLOW));
+			if(c == '/' && comment == 0)
+				comment = '/';
+			else if(c == '/' && comment == '/') {
+				comment = 1;
+				attron(COLOR_PAIR(COMMENT));
+                                mvaddch(i, col++, '/');
+                                attroff(COLOR_PAIR(COMMENT));
+			}			
+	
+		LABEL:
+			if(comment == 1) {
+				if(brk)
+					break;
+				attron(COLOR_PAIR(COMMENT));
+                                mvaddch(i, col++, c);
+                                attroff(COLOR_PAIR(COMMENT));
+			}
+			else if(c == ' ' || c == '(' || c == ';' || brk) {
+				word_arr[windx++] = '\0';
+				if(! search(keyword, word_arr, &color))
+					color = WHITE;
+
+				attron(COLOR_PAIR(color));
+				for(int k = 0; word_arr[k] != '\0'; k++)
+					mvaddch(i, col++, word_arr[k]);
+				attroff(COLOR_PAIR(color));
+				
+				if(brk)
+					break;
+				mvaddch(i, col++, c);
+				windx = 0;
+			}
+			else
+				word_arr[windx++] = c;
                 }
         }
 	return;
@@ -115,14 +153,12 @@ int main() {
 	fd_store_prev = fopen(".hi_pr.tmp", "w+");
         fd_store_next = fopen(".hi_nxt.tmp", "w+");
 	
-	char **shortcut_key = init_shortcut_keys();
 /*	
 	for(int i = 0; shortcut_key[4][i] != 0; i++)
 		printf("%c", shortcut_key[4][i]);
 	return 0;
 */	
 	/*
-	print(window_1);
 	printf("\n");
 	int a = 0, b = 0;
 	for(int i = 0; i < 1; i++) {
@@ -179,19 +215,26 @@ int main() {
         noecho();
         keypad(stdscr, true);
 	init_colors();
+	TrieNode *keyword = init_keywords();
+	char **shortcut_key = init_shortcut_keys();
 
 	int ch;
 	int win_line = 0, win_col = 0, line_no = 0;
 	int pos_changed = 0;
 
-	print_page(window_1);
+	print_page(window_1, keyword);
 	print_loc(line_no, win_col);
 	move(line_no, win_col);
 	while(1) {
 		ch = getch();
 
 		int move_left = 0;
+		char start_bracket, end_bracket;
 		int sk_index = shortcut_key_indx(&ch, &move_left);
+		//print_debug(ch, 5);
+		check_bracket(&ch, &start_bracket, &end_bracket);
+		//printf(ch, 5);
+		
 		switch(ch) {
 			case 'q':
 				endwin();
@@ -297,6 +340,16 @@ int main() {
 				break;
 			}
 
+			case BRACKET: { 
+				int h_indx = head_index(window_1, win_line);
+                                (window_1.head)[h_indx].line_size += 2;
+                                insert_at_pos(&((window_1.head)[h_indx].line), win_col++, start_bracket);
+				insert_at_pos(&((window_1.head)[h_indx].line), win_col++, end_bracket);
+                                store_info(&st, pos_changed, ch, INSERT_CHAR, win_line, win_col);
+				win_col--;
+                                pos_changed = 0;
+				break;
+			}
 
 			case SHORTCUT_KEY: {
 				for(int i = 0; shortcut_key[sk_index][i] != '\0'; i++) {
@@ -336,7 +389,7 @@ int main() {
 			}
 		}
 
-		print_page(window_1);
+		print_page(window_1, keyword);
 		print_loc(line_no, win_col);
 		move(win_line, win_col);
 	}

@@ -1,13 +1,15 @@
-#include<stdio.h>
-#include<stdlib.h>
-struct node              // Structure defined for each node
-{
+#include <stdio.h>
+#include <stdlib.h>
+
+// Structure defined for each node
+struct node {
 	int value;
 	struct node* left;
-        struct node* right;
+	struct node* right;
 };
 
-struct node* createNode(int data){       //function which initializes a new node
+//function which initializes a new node
+struct node* createNode(int data) {
     int nodeSize = sizeof(struct node);
     struct node* newNode = malloc(nodeSize);
     newNode->value = data;
@@ -18,9 +20,10 @@ struct node* createNode(int data){       //function which initializes a new node
 }
 
 
-struct node* insertNode(struct node* current, int data)    //inserts a node in BST
-{
-    if (current == NULL)     // if the current reaches NULL, data is to be inserted here
+//inserts a node in BST
+struct node* insertNode(struct node* current, int data) {
+    // if the current reaches NULL, data is to be inserted here
+    if (current == NULL)
         return createNode(data);
     if (current->value < data)
         current->right = insertNode(current->right, data); 

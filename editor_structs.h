@@ -3,13 +3,14 @@
 
 #define SUCCESS			0
 #define FAILURE			1
-#define TOT_LINES_IN_WINDOW	20
+#define TOT_LINES_IN_WINDOW	35
 #define MAX_CHAR_IN_SUBLINE	5
 #define MAX_CHAR 		-128
 #define BACKSPACE		8
 #define DELETE			127
 #define TAB_SPACE		4
 #define SHORTCUT_KEY		-5
+#define BRACKET			-6
 
 typedef struct line {
         char *curr_line;

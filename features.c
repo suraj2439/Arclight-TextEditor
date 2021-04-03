@@ -1,6 +1,5 @@
 #include "features.h"
 
-
 void init_colors() {        
         start_color();
         init_pair(ORANGE, ORANGE, COLOR_BLACK);
@@ -10,14 +9,43 @@ void init_colors() {
 	init_pair(WHITE, WHITE, COLOR_BLACK);
 	init_pair(DBLUE, DBLUE, COLOR_BLACK);
 	init_pair(LBLUE, LBLUE, COLOR_BLACK);
+	init_pair(COMMENT, COMMENT, COLOR_BLACK);
         // 3(orange), 15(white), 9(red), 10(light_green), 11(yerllow), 14(light blue), 21(dark blue), 39(light blue)
 
 }
 
-void init_keywords() {
-	char keys[][8] = {"the", "a", "there", "answer", "any",
-                     "by", "bye", "their"};
-	
+TrieNode* init_keywords() {
+
+        char grp1[][8] = {"int", "char", "double", "long", "auto",
+                     "signed", "unsigned", "void", "float", "short"};
+        char grp2[][8] = {"register", "extern", "static", "volatile", "const"};
+
+        char grp3[][8] = {"typedef", "struct", "enum", "union"};
+
+        char grp4[][8] = {"continue", "break", "return", "sizeof"};
+
+        char grp5[][8] = {"for", "while", "do", "goto"};
+
+        char grp6[][8] = {"if", "else", "switch", "case", "default"};
+
+        TrieNode *root = getNode();
+
+        // Construct trie
+        int i;
+        for (i = 0; i < ARRAY_SIZE(grp1); i++)
+                insert(root, grp1[i], ORANGE);
+        for (i = 0; i < ARRAY_SIZE(grp2); i++)
+                insert(root, grp2[i], RED);
+        for (i = 0; i < ARRAY_SIZE(grp3); i++)
+                insert(root, grp3[i], GREEN);
+        for (i = 0; i < ARRAY_SIZE(grp4); i++)
+                insert(root, grp4[i], LBLUE);
+        for (i = 0; i < ARRAY_SIZE(grp5); i++)
+                insert(root, grp5[i], DBLUE);
+        for (i = 0; i < ARRAY_SIZE(grp6); i++)
+                insert(root, grp6[i], YELLOW);
+
+        return root;
 }
 
 
@@ -68,3 +96,26 @@ int shortcut_key_indx(int *ch, int *move) {
         }
 }
 
+void check_bracket(int *ch, char *start, char *end) {
+	int tmp = *ch;
+	*ch = BRACKET;
+	switch(tmp) {
+		case '(':
+			*start = '(';
+			*end = ')';
+			return;
+
+		case '{':
+			*start = '{';
+			*end = '}';
+			return;
+			
+		case '[':
+			*start = '[';
+			*end = ']';
+			return;
+		default:
+			*ch = tmp;
+			return;
+	}
+}
