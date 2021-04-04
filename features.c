@@ -50,51 +50,62 @@ TrieNode* init_keywords() {
 
 
 char** init_shortcut_keys() {
-	char **shortcut_key = (char**)malloc(sizeof(char*) * 7);
-        shortcut_key[0] = "printf(\"%\");";
-        shortcut_key[1] = "scanf(\"%\");";
+	char **shortcut_key = (char**)malloc(sizeof(char*) * TOT_SHORTCUT_KEYS);
+        shortcut_key[0] = "printf(\"%\",);";
+        shortcut_key[1] = "scanf(\"%\",);";
         shortcut_key[2] = "#include <>";
         shortcut_key[3] = "#define ";
         shortcut_key[4] = "int main() {\n    \n    return 0;\n}";
-        shortcut_key[5] = "for(int i = 0; )";
-        shortcut_key[6] = "while()";
+        shortcut_key[5] = "for(int i = ; )";
+        shortcut_key[6] = "while()\n";
+	shortcut_key[7] = "return ;\n";
+	shortcut_key[8] = "typedef struct {\n    \n} ;";
 	return shortcut_key;
 }
 
 int shortcut_key_indx(int *ch, int *move) {
         switch(*ch) {
-                case 'p':
+               	case CTRL('p'):
                         *ch = SHORTCUT_KEY;
-                        *move = 3;
+                        *move = 4;
                         return 0;
-                case 's':
+                case CTRL('a'):
                         *ch = SHORTCUT_KEY;
-                        *move = 3;
+                        *move = 4;
                         return 1;
-                case 'i':
+		case CTRL('e'):
                         *ch = SHORTCUT_KEY;
                         *move = 1;
                         return 2;
-                case 'd':
+		case CTRL('d'):
                         *ch = SHORTCUT_KEY;
                         *move = 0;
                         return 3;
-                case 'm':
+		case CTRL('n'):
                         *ch = SHORTCUT_KEY;
                         *move = 16;
                         return 4;
-                case 'f':
+		case CTRL('f'):
                         *ch = SHORTCUT_KEY;
-                        *move = 1;
+                        *move = 3;
                         return 5;
-                case 'w':
+		case CTRL('w'):
                         *ch = SHORTCUT_KEY;
                         *move = 1;
                         return 6;
+		case CTRL('r'):
+                        *ch = SHORTCUT_KEY;
+                        *move = 1;
+                        return 7;
+		case CTRL('t'):
+                        *ch = SHORTCUT_KEY;
+                        *move = 10;
+                        return 8;
                 default:
                         return -1;
         }
 }
+
 
 void check_bracket(int *ch, char *start, char *end) {
 	int tmp = *ch;

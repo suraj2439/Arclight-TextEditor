@@ -29,10 +29,12 @@ void print_page(win w, TrieNode *keyword) {
 		char comment = 0;
 		char color = WHITE;
 
+		h_indx = head_index(w, i);
+		/*
 		h_indx = i;
 		// circular array
 		if(h_indx + w.head_indx >= w.tot_lines)
-			h_indx = h_indx - w.tot_lines;
+			h_indx = h_indx - w.tot_lines;*/
 
 		lne = &((w.head)[h_indx].line);
 		char c = 1;
@@ -102,6 +104,8 @@ void print_page(win w, TrieNode *keyword) {
         }
 	return;
 }
+
+void print_line();
 
 
 void print(win w) {
@@ -214,6 +218,7 @@ int main() {
         initscr();
         noecho();
         keypad(stdscr, true);
+
 	init_colors();
 	TrieNode *keyword = init_keywords();
 	char **shortcut_key = init_shortcut_keys();
@@ -225,8 +230,11 @@ int main() {
 	print_page(window_1, keyword);
 	print_loc(line_no, win_col);
 	move(line_no, win_col);
+
+	int cnt = 0;
 	while(1) {
 		ch = getch();
+		cnt++;
 
 		int move_left = 0;
 		char start_bracket, end_bracket;
@@ -350,6 +358,41 @@ int main() {
                                 pos_changed = 0;
 				break;
 			}
+			
+			case CTRL(';'): {
+				int h_indx = head_index(window_1, win_line);
+				insert_at_pos(&((window_1.head)[h_indx].line), (window_1.head)[h_indx].line_size++, ';');
+				break;
+			}
+
+			case CTRL('h'):
+				pos_changed = 1;
+				win_col = 0;
+				break;
+			case CTRL('l'):
+				pos_changed = 1;
+                                win_col = (window_1.head)[head_index(window_1, win_line)].line_size;
+                                break;
+			case CTRL('o'): {
+				pos_changed = 1;
+				line_no -= win_line;
+                                win_line = 0;
+
+                                int h_indx = head_index(window_1, win_line);
+                                if(win_col > (window_1.head)[h_indx].line_size)
+                                        win_col = (window_1.head)[h_indx].line_size;
+                                break;
+			}
+                        case CTRL('k'): {
+				pos_changed = 1;
+				line_no += window_1.tot_lines-1 - win_line;
+				win_line = window_1.tot_lines-1;
+
+				int h_indx = head_index(window_1, win_line);
+				if(win_col > (window_1.head)[h_indx].line_size)
+					win_col = (window_1.head)[h_indx].line_size;
+                                break;
+			}	
 
 			case SHORTCUT_KEY: {
 				for(int i = 0; shortcut_key[sk_index][i] != '\0'; i++) {

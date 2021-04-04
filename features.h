@@ -15,6 +15,8 @@
 #define LBLUE		39
 #define COMMENT		44
 
+#define TOT_SHORTCUT_KEYS	9
+
 char** init_shortcut_keys();
 
 int shortcut_key_indx(int *ch, int *move);

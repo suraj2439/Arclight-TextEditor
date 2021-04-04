@@ -11,6 +11,7 @@
 #define TAB_SPACE		4
 #define SHORTCUT_KEY		-5
 #define BRACKET			-6
+#define CTRL(x)           ((x) & 0x1f)
 
 typedef struct line {
         char *curr_line;
