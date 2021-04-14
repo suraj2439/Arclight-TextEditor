@@ -57,8 +57,8 @@ char** init_shortcut_keys() {
         shortcut_key[3] = "#define ";
         shortcut_key[4] = "int main() {\n    \n    return 0;\n}";
         shortcut_key[5] = "for(int i = ; )";
-        shortcut_key[6] = "while()\n";
-	shortcut_key[7] = "return ;\n";
+        shortcut_key[6] = "while()";
+	shortcut_key[7] = "return ;";
 	shortcut_key[8] = "typedef struct {\n    \n} ;";
 	return shortcut_key;
 }

@@ -7,6 +7,8 @@
 #include "editor_structs.h"
 #include "gap_buffer.h"
 
+int file_exists(char *filename);
+
 /*use to initialise window*/
 void init_window(win *w, int tot_lines);
 

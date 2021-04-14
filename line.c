@@ -1,6 +1,5 @@
 #include "line.h"
 
-
 /*to free corresponding sublines*/
 void free_line(line* lne) {
         line* tmp_1 = lne->rem_line;
@@ -26,7 +25,7 @@ void extract_line(node_l *tmp, FILE *fd_store) {
         line *data_line = &tmp->line;
 	int indx = 0;
 
-	// if line is empty means blank line, insert '\n' and return 	//TODO don changed
+	// if line is empty means blank line, insert '\n' and return
 	if(data_line->gap_size == MAX_CHAR_IN_SUBLINE && data_line->rem_line == NULL) {
 		fputc('\n', fd_store);
 		return;
@@ -108,7 +107,6 @@ int next_line_into_data_struct(line *lne, int extract_from_next, FILE *fd_store_
                 }
                 return indx;
         }
-
 }
 
 

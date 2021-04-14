@@ -13,7 +13,7 @@
 
 // Converts key current character into index
 // use only 'a' through 'z' and lower case
-#define CHAR_TO_INDEX(c) ((int)c - (int)'a')
+//#define CHAR_TO_INDEX(c) ((int)c - (int)'a')
 
 // trie node
 typedef struct TrieNode {

@@ -1,7 +1,6 @@
 #include "trie.h"
 
 
-// Returns new trie node (initialized to NULLs)
 TrieNode *getNode(void) {
     TrieNode *pNode = NULL;
   
@@ -12,16 +11,22 @@ TrieNode *getNode(void) {
   
 	pNode->color = 0;
         pNode->isEndOfWord = false;
-  
-        for (i = 0; i < ALPHABET_SIZE; i++)
+
+	//adding extra character '_'
+        for (i = 0; i < ALPHABET_SIZE + 1; i++)
             pNode->children[i] = NULL;
     }
 
     return pNode;
 }
   
-// If not present, inserts key into trie
-// If the key is prefix of trie node, just marks leaf node
+
+int char_to_index(char c) {
+	if(c == '_')
+		return ALPHABET_SIZE;
+	else return ((int)c - (int)'a'); 
+}
+
 void insert(TrieNode *root, const char *key, char color) {
     int level;
     int length = strlen(key);
@@ -30,7 +35,7 @@ void insert(TrieNode *root, const char *key, char color) {
     TrieNode *pCrawl = root;
   
     for (level = 0; level < length; level++) {
-        index = CHAR_TO_INDEX(key[level]);
+        index = char_to_index(key[level]);
         if (!pCrawl->children[index])
             pCrawl->children[index] = getNode();
   
@@ -52,7 +57,7 @@ bool search(TrieNode *root, const char *key, char *color) {
     for (level = 0; level < length; level++) {
 	if( key[level] < 'a' || key[level] > 'z')
 		return false;
-        index = CHAR_TO_INDEX(key[level]);
+        index = char_to_index(key[level]);
   
         if (!pCrawl->children[index])
             return false;

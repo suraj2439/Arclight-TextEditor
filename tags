@@ -10,6 +10,7 @@ BACKSPACE	editor_structs.h	9;"	d
 BRACKET	editor_structs.h	13;"	d
 CHAR_TO_INDEX	trie.h	16;"	d
 COMMENT	features.h	16;"	d
+CTRL	editor_structs.h	14;"	d
 DBLUE	features.h	14;"	d
 DELETE	editor_structs.h	10;"	d
 DEL_CHAR	stack.c	5;"	d	file:
@@ -36,6 +37,7 @@ SHORTCUT_KEY	editor_structs.h	12;"	d
 SUCCESS	editor_structs.h	4;"	d
 TAB_SPACE	editor_structs.h	11;"	d
 TOT_LINES_IN_WINDOW	editor_structs.h	6;"	d
+TOT_SHORTCUT_KEYS	features.h	18;"	d
 TRIE_H	trie.h	2;"	d
 TrieNode	trie.h	/^typedef struct TrieNode {$/;"	s
 TrieNode	trie.h	/^} TrieNode;$/;"	t	typeref:struct:TrieNode
