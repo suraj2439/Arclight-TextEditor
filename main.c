@@ -187,6 +187,14 @@ int main(int argc, char *argv[]) {
 
         fd_store_prev = fopen(prev_file, "w+");
         fd_store_next = fopen(next_file, "w+");	
+
+
+	FILE *fd_cb_key, *fd_cb_data;
+        fd_cb_key = fopen(".codebase.key", "r+");
+        fd_cb_data = fopen(".codebase.data","r+");
+        int codebase_mode = 0;
+        TrieNode_c *codebase = init_codebase(fd_cb_key);
+
 /*	
 	for(int i = 0; shortcut_key[4][i] != 0; i++)
 		printf("%c", shortcut_key[4][i]);
@@ -278,6 +286,8 @@ int main(int argc, char *argv[]) {
 	                	fclose(fd_main);
 	        	        fclose(fd_store_prev);
         	        	fclose(fd_store_next);
+				fclose(fd_cb_key);
+		                fclose(fd_cb_data);
 
 				if(new_file)
         		        	remove(argv[1]);
@@ -482,11 +492,84 @@ int main(int argc, char *argv[]) {
 				break;
 			}
 
-			case KEY_F(1):
-				//codebase_mode = 1;
+		CODEBASE_KEY_MODE:
+			case KEY_F(1): {
+				// accept input key from user
+				char *key = accept_codebase_key(win_line, win_col);
+				// validate key
+				if(! validate_codebase_key(key)) {
+					// if invalid print msg on screen
+					print_cbError();
+					ch = getch();
+					// if retry option selected, goto start of this block
+					if(ch == KEY_F(1)) {
+						move(CB_X, CB_Y);
+						clrtoeol();
+						goto CODEBASE_KEY_MODE;
+					}
+					// user dont want to retry, back to editor
+					else {
+						move(CB_X, CB_Y);
+                                                clrtoeol();
+						move(win_line, win_col);
+						break;
+					}
+				}
+				// key is valid, accept data to store in codebase
+				print_cbAccept();
+				
+				// goto end to store data
+				fseek(fd_cb_data, 0, SEEK_END);
+				// store lower(start) offset of data
+                                long int lower = ftell(fd_cb_data);
+				// fill data
+				while((ch = getch()) != KEY_F(2)) {
+					fputc(ch, fd_cb_data);
+				}
+				// store upper(end) offset of data
+				long int upper = ftell(fd_cb_data);
+				// insert key in trie
+				insert_in_codebase(codebase, key, (int)lower, (int)upper);
+				// insert key in codebase file
+				store_key(fd_cb_key, key, (int)lower, (int)upper);
+
+				print_cbSuccess(key);
+
+				break;
+			}
+
+			case KEY_F(3): {
+				// accept key to search in trie
+				char *key = accept_codebase_key(win_line, win_col);
+				int lower, upper;
+				// search input key
+			  	if(search_in_codebase(codebase, key, &lower, &upper)) {
+					// goto start of data
+					fseek(fd_cb_data, lower, SEEK_SET);
+					while(ftell(fd_cb_data) != upper) {
+						ch = fgetc(fd_cb_data);
+						
+						if(ch != '\n') {
+							int h_indx = head_index(window_1, win_line);
+	                	        	        (window_1.head)[h_indx].line_size++;
+        	                	        	insert_at_pos(&((window_1.head)[h_indx].line), win_col++, ch);
+	                	                	store_info(&st, pos_changed, ch, INSERT_CHAR, win_line, win_col);
+        	         	       		        pos_changed = 0;
+						}
+						else {
+							line_no++;
+			                                insert_new_line_at_pos(&window_1, &win_line, &win_col, 
+									fd_store_prev, fd_store_next, fd_main);
+                        			        store_info(&st, pos_changed, ch, INSERT_NEW_LINE, win_line, win_col);
+ 			                               pos_changed = 0;
+						}
+					}
+				}
+				else print_cbNotFound(key);
+			}
 				break;
 
-			default: {
+			default:{
                         	int h_indx = head_index(window_1, win_line);
                         	(window_1.head)[h_indx].line_size++;
                         	insert_at_pos(&((window_1.head)[h_indx].line), win_col++, ch);
@@ -498,6 +581,7 @@ int main(int argc, char *argv[]) {
 		print_page(window_1, keyword);
 		print_loc(line_no, win_col);
 		move(win_line, win_col);
+		refresh();
 	}
 
 	SAVE:
@@ -583,6 +667,8 @@ int main(int argc, char *argv[]) {
 		fclose(fd_main);
                 fclose(fd_store_prev);
                 fclose(fd_store_next);
+		fclose(fd_cb_key);
+		fclose(fd_cb_data);
 
 		remove(argv[1]);
 		remove(prev_file);

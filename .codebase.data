@@ -1,0 +1,12 @@
+int swap(int *x, int *y) {
+    int tmp = *x;
+    *x = *y;
+    *y = tmp;
+    return;
+}
+int swap(int *x, int *y) {
+    int tmp = *x;
+    *x = *y;
+    *y = tmp;
+    return;
+}

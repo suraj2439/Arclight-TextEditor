@@ -1,0 +1,4 @@
+
+rm .codebase.key .codebase.data
+touch .codebase.key
+touch .codebase.data

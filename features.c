@@ -49,6 +49,102 @@ TrieNode* init_keywords() {
 }
 
 
+TrieNode_c* init_codebase(FILE *fd) {
+	TrieNode_c *root = codebaseNode();
+	char key[MAX_KEY];
+	char ch;
+	while(1) {
+		if((ch = fgetc(fd)) == -1)
+			return root;
+		ungetc(ch, fd);
+
+		fscanf(fd, "%s", key);
+	
+		int lower, upper;
+		fscanf(fd, "%d", &lower);
+		fscanf(fd, "%d", &upper);
+
+		insert_in_codebase(root, key, lower, upper);
+	}
+}
+
+
+char* accept_codebase_key(int x, int y) {
+	move(CB_X, CB_Y);
+	clrtoeol();
+	refresh();
+	char ch;
+	char* arr = (char*)malloc(sizeof(char) * MAX_KEY);
+	for(int i = 0; (ch = getch()) != '\n'; i++) {
+		arr[i] = ch;
+		mvprintw(CB_X, CB_Y + i, "%c", ch);
+	}
+	move(CB_X, CB_Y);
+	clrtoeol();
+	move(x, y);
+	refresh();
+	return arr;
+}
+
+void store_key(FILE *fd, char *key, int lower, int upper) {
+	fprintf(fd, "%s\n", key);
+	fprintf(fd, "%d\n", lower);
+	fprintf(fd, "%d\n", upper);
+	return;
+}
+
+void print_cbError() {
+	move(CB_X, CB_Y);
+	clrtoeol();
+	refresh();
+	mvprintw(CB_X, CB_Y, "%s", "Invalid Key, Press F1 to retry Or any other key to continue to editor...");
+	refresh();
+	return;
+}
+
+void print_cbAccept() {
+        move(CB_X, CB_Y);
+	clrtoeol();
+        refresh();
+        mvprintw(CB_X, CB_Y, "%s", "Now Select CODE and press 'CTRL+SHIFT+V' to store in CodeBase...");
+        refresh();
+        return;
+}
+
+void print_cbSuccess(char *key) {
+	move(CB_X, CB_Y);
+	clrtoeol();
+        refresh();
+        mvprintw(CB_X, CB_Y, "%s%s", "Your code is successfully added in codebase with key: ", key);
+        refresh();
+	getch();
+	move(CB_X, CB_Y);
+	clrtoeol();
+        return;
+}
+
+void print_cbNotFound(char *key) {
+	move(CB_X, CB_Y);
+        clrtoeol();
+        refresh();
+        mvprintw(CB_X, CB_Y, "%s%s%s", "Oops! '", key, "' is not pressent in codebase...");
+        refresh();
+	getch();
+        move(CB_X, CB_Y);
+        clrtoeol();
+        return;
+
+}
+
+
+int validate_codebase_key(char* key) {
+	for(int i = 0; key[i] != '\0'; i++) {
+		if((!isalnum(key[i])) && key[i] != '_')
+			return 0;
+	}
+	return 1;
+}
+
 char** init_shortcut_keys() {
 	char **shortcut_key = (char**)malloc(sizeof(char*) * TOT_SHORTCUT_KEYS);
         shortcut_key[0] = "printf(\"%\",);";

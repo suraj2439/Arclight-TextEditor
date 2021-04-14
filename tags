@@ -4,11 +4,10 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.9~svn20110310	//
-ALPHABET_SIZE	trie.h	12;"	d
-ARRAY_SIZE	trie.h	9;"	d
+ALPHABET_SIZE	trie.h	11;"	d
+ARRAY_SIZE	trie.h	8;"	d
 BACKSPACE	editor_structs.h	9;"	d
 BRACKET	editor_structs.h	13;"	d
-CHAR_TO_INDEX	trie.h	16;"	d
 COMMENT	features.h	16;"	d
 CTRL	editor_structs.h	14;"	d
 DBLUE	features.h	14;"	d
@@ -31,6 +30,7 @@ LOAD_PREV_LINE	stack.c	9;"	d	file:
 MAX_CHAR	editor_structs.h	8;"	d
 MAX_CHAR_IN_SUBLINE	editor_structs.h	7;"	d
 MAX_DATA_IN_ONE_NODE	stack.c	10;"	d	file:
+MAX_KEY	trie.h	12;"	d
 ORANGE	features.h	9;"	d
 RED	features.h	10;"	d
 SHORTCUT_KEY	editor_structs.h	12;"	d
@@ -41,15 +41,21 @@ TOT_SHORTCUT_KEYS	features.h	18;"	d
 TRIE_H	trie.h	2;"	d
 TrieNode	trie.h	/^typedef struct TrieNode {$/;"	s
 TrieNode	trie.h	/^} TrieNode;$/;"	t	typeref:struct:TrieNode
+TrieNode_c	trie.h	/^typedef struct TrieNode_c {$/;"	s
+TrieNode_c	trie.h	/^} TrieNode_c;$/;"	t	typeref:struct:TrieNode_c
 WHITE	features.h	13;"	d
 YELLOW	features.h	12;"	d
 arr	stack.c	/^	char arr[MAX_DATA_IN_ONE_NODE];$/;"	m	struct:data	file:
+char_to_index	trie.c	/^int char_to_index(char c) {$/;"	f
 check_bracket	features.c	/^void check_bracket(int *ch, char *start, char *end) {$/;"	f
 check_next_line_available	line.c	/^int check_next_line_available(FILE *fd_store_next, FILE *fd_main) {$/;"	f
 check_prev_line_available	line.c	/^int check_prev_line_available(FILE *fd_store_prev) {$/;"	f
 children	trie.h	/^    struct TrieNode *children[ALPHABET_SIZE];$/;"	m	struct:TrieNode	typeref:struct:TrieNode::TrieNode
+children	trie.h	/^    struct TrieNode_c *children[ALPHABET_SIZE];$/;"	m	struct:TrieNode_c	typeref:struct:TrieNode_c::TrieNode_c
+codebaseNode	trie.c	/^TrieNode_c *codebaseNode(void) {$/;"	f
 color	trie.h	/^    char color;$/;"	m	struct:TrieNode
 createNode	1.c	/^struct node* createNode(int data) {$/;"	f
+createNode	2.c	/^struct node* createNode(int data) {$/;"	f
 curr_line	editor_structs.h	/^        char *curr_line;$/;"	m	struct:line
 data	stack.c	/^typedef struct data {$/;"	s	file:
 data	stack.c	/^} data;$/;"	t	typeref:struct:data	file:
@@ -68,7 +74,10 @@ head	editor_structs.h	/^	node_l *head;$/;"	m	struct:win
 head_index	line.c	/^int head_index(win w, int line_no) {	\/\/TODO: use in print fun$/;"	f
 head_indx	editor_structs.h	/^	int tot_lines, head_indx;$/;"	m	struct:win
 inOrderTraversal	1.c	/^void inOrderTraversal(struct node* current){  \/\/recursive code to print in-order$/;"	f
+inOrderTraversal	2.c	/^void inOrderTraversal(struct node* current){  \/\/recursive code to print in-order$/;"	f
+info	trie.h	/^    char *info;$/;"	m	struct:TrieNode_c
 init	stack.c	/^void init(stack *st) {$/;"	f
+init_codebase	features.c	/^TrieNode* init_codebase() {$/;"	f
 init_colors	features.c	/^void init_colors() {        $/;"	f
 init_gap_buff	gap_buffer.c	/^void init_gap_buff(line *lne) {$/;"	f
 init_keywords	features.c	/^TrieNode* init_keywords() {$/;"	f
@@ -76,11 +85,15 @@ init_shortcut_keys	features.c	/^char** init_shortcut_keys() {$/;"	f
 init_window	init_editor.c	/^void init_window(win *w, int tot_lines) {$/;"	f
 insert	trie.c	/^void insert(TrieNode *root, const char *key, char color) {$/;"	f
 insertNode	1.c	/^struct node* insertNode(struct node* current, int data) {$/;"	f
+insertNode	2.c	/^struct node* insertNode(struct node* current, int data) {$/;"	f
 insert_at_pos	editor_func.c	/^void insert_at_pos(line *subline, int position, char data) {$/;"	f
+insert_in_codebase	trie.c	/^void insert_in_codebase(TrieNode_c *root, const char *key, char* info) {$/;"	f
 insert_new_line_at_pos	editor_func.c	/^void insert_new_line_at_pos(win *w, int *lne_no, int *col_no, FILE *fd_prev, FILE *fd_nxt, FILE *fd_main) {$/;"	f
 isEmpty	stack.c	/^int isEmpty(stack st) {$/;"	f
-isEndOfWord	trie.h	/^    bool isEndOfWord;$/;"	m	struct:TrieNode
-left	1.c	/^	struct node* left;$/;"	m	struct:node	typeref:struct:node::node	file:
+isEndOfWord	trie.h	/^    char isEndOfWord;$/;"	m	struct:TrieNode
+isEndOfWord	trie.h	/^    char isEndOfWord;$/;"	m	struct:TrieNode_c
+left	1.c	/^    struct node* left;$/;"	m	struct:node	typeref:struct:node::node	file:
+left	2.c	/^    struct node* left;$/;"	m	struct:node	typeref:struct:node::node	file:
 line	editor_structs.h	/^	line line;$/;"	m	struct:node_l
 line	editor_structs.h	/^typedef struct line {$/;"	s
 line	editor_structs.h	/^} line;$/;"	t	typeref:struct:line
@@ -89,7 +102,9 @@ load_file	init_editor.c	/^FILE* load_file(win *w, char *filename) {$/;"	f
 load_next_line	line.c	/^int load_next_line(win *w, FILE *fd_store_prev, FILE *fd_store_next, FILE *fd_main) {$/;"	f
 load_prev_line	line.c	/^int load_prev_line(win *w, FILE *fd_store_prev, FILE *fd_store_next) {$/;"	f
 main	1.c	/^int main(){$/;"	f
-main	main.c	/^int main() {$/;"	f
+main	2.c	/^int main(){$/;"	f
+main	main.c	/^int main(int argc, char *argv[]) {$/;"	f
+main	tmp.c	/^int main() {$/;"	f
 move_cursor	gap_buffer.c	/^line* move_cursor(line *subline, int position) {$/;"	f
 move_gap_left	gap_buffer.c	/^void move_gap_left(line *lne, int position) {$/;"	f
 move_gap_right	gap_buffer.c	/^void move_gap_right(line *lne, int position) {$/;"	f
@@ -97,6 +112,7 @@ next	stack.c	/^	struct data *next;$/;"	m	struct:data	typeref:struct:data::data	f
 next	stack.c	/^	struct node *next;$/;"	m	struct:node	typeref:struct:node::node	file:
 next_line_into_data_struct	line.c	/^int next_line_into_data_struct(line *lne, int extract_from_next, FILE *fd_store_next, FILE *fd_main) {$/;"	f
 node	1.c	/^struct node {$/;"	s	file:
+node	2.c	/^struct node {$/;"	s	file:
 node	stack.c	/^typedef struct node {$/;"	s	file:
 node	stack.c	/^} node;$/;"	t	typeref:struct:node	file:
 node_l	editor_structs.h	/^typedef struct node_l { $/;"	s
@@ -113,14 +129,17 @@ print_loc	main.c	/^void print_loc(int x, int y) {$/;"	f
 print_page	main.c	/^void print_page(win w, TrieNode *keyword) {$/;"	f
 push	stack.c	/^void push(stack *st, node *nn) {$/;"	f
 rem_line	editor_structs.h	/^        struct line *rem_line;$/;"	m	struct:line	typeref:struct:line::line
-right	1.c	/^	struct node* right;$/;"	m	struct:node	typeref:struct:node::node	file:
-search	trie.c	/^bool search(TrieNode *root, const char *key, char *color) {$/;"	f
+right	1.c	/^    struct node* right;$/;"	m	struct:node	typeref:struct:node::node	file:
+right	2.c	/^    struct node* right;$/;"	m	struct:node	typeref:struct:node::node	file:
+search	trie.c	/^int search(TrieNode *root, const char *key, char *color) {$/;"	f
+search_in_codebase	trie.c	/^int search_in_codebase(TrieNode_c *root, const char *key, char** info) {$/;"	f
 shortcut_key_indx	features.c	/^int shortcut_key_indx(int *ch, int *move) {$/;"	f
 stack	stack.c	/^typedef node* stack;$/;"	t	file:
 store_info	stack.c	/^void store_info(stack *st, int pos_changed, char data_c, char operation, int x, int y) {$/;"	f
 tot_lines	editor_structs.h	/^	int tot_lines, head_indx;$/;"	m	struct:win
 undo	stack.c	/^void undo(stack *st, win *w, int *line_no, int* win_line, int *position, FILE *fd_store_prev, FILE *fd_store_next, FILE *fd_main) {$/;"	f
-value	1.c	/^	int value;$/;"	m	struct:node	file:
+value	1.c	/^    int value;$/;"	m	struct:node	file:
+value	2.c	/^    int value;$/;"	m	struct:node	file:
 win	editor_structs.h	/^typedef struct win {$/;"	s
 win	editor_structs.h	/^} win;$/;"	t	typeref:struct:win
 x	stack.c	/^	int x, y;$/;"	m	struct:position	file:

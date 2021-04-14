@@ -1,6 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+int swap(int *x, int *y) {
+    int tmp = *x;
+    *x = *y;
+    *y = tmp;
+    return;
+}
+
+
 // Structure defined for each node
 struct node {
     int value;
@@ -18,7 +26,6 @@ struct node* createNode(int data) {
 
     return newNode;
 }
-
 //inserts a node in BST
 struct node* insertNode(struct node* current, int data) {
     // if the current reaches NULL, data is to be inserted here
