@@ -288,3 +288,226 @@ void insert_new_line_at_pos(win *w, int *lne_no, int *col_no, FILE *fd_prev, FIL
 	return;
 }
 
+
+void print_loc(int x, int y) {
+	move(LOC_X, LOC_Y);
+	clrtoeol();
+        mvprintw(LOC_X, LOC_Y, "x: %d y: %d", x, y);
+}
+
+void print_debug(int x, int y) {
+        mvprintw(1, 90, "k: %d b: %d", x, y);
+}
+
+
+/*use to print contents of ADT - for testing*/
+void print_page(win w, TrieNode *keyword) {
+	line *lne;
+	int h_indx;
+	char word_arr[100];
+	for(int i = 0; i < w.tot_lines; i++) {
+		// for keyword coloring
+		int windx = 0;
+		char comment = 0;
+		char color = WHITE;
+
+		h_indx = head_index(w, i);
+
+		lne = &((w.head)[h_indx].line);
+		char c = 1;
+		int indx = 0;
+
+		if(lne->curr_line[0] == MAX_CHAR) {
+			for(; i < w.tot_lines; i++) {
+				h_indx = head_index(w, i);
+				lne = &((w.head)[h_indx].line);
+				mvaddch(i, 0, TILDE);
+			}
+			refresh();
+                        return;
+		}
+
+		// to clear previously written line from screen
+		move(i, 0);
+                clrtoeol();
+		int col = 0;
+	
+		// 3(orange), 15(white), 9(red), 10(light_green), 11(yerllow), 21(dark blue), 39(light_blue)
+
+		int brk = 0;
+                while(1) {
+                        if(lne->gap_size != 0 && indx == lne->gap_left)
+				indx = lne->gap_right + 1;
+			if(indx == MAX_CHAR_IN_SUBLINE) {
+				if(lne->rem_line == NULL) {
+					brk = 1;
+					goto LABEL;
+					// new line
+				}
+                                lne = lne->rem_line;
+                                indx = 0;
+				continue;
+                        }
+			
+			c = lne->curr_line[indx++];
+			if(c == '/' && comment == 0)
+				comment = '/';
+			else if(c == '/' && comment == '/') {
+				comment = 1;
+				attron(COLOR_PAIR(COMMENT));
+                                mvaddch(i, col++, '/');
+                                attroff(COLOR_PAIR(COMMENT));
+			}			
+	
+		LABEL:
+			if(comment == 1) {
+				if(brk)
+					break;
+				attron(COLOR_PAIR(COMMENT));
+                                mvaddch(i, col++, c);
+                                attroff(COLOR_PAIR(COMMENT));
+			}
+			else if(c == '#' || c == '<' || c == ' ' || c == '(' || c == ';' || brk) {
+				word_arr[windx++] = '\0';
+				if(! search(keyword, word_arr, &color))
+					color = WHITE;
+
+				attron(COLOR_PAIR(color));
+				for(int k = 0; word_arr[k] != '\0'; k++)
+					mvaddch(i, col++, word_arr[k]);
+				attroff(COLOR_PAIR(color));
+				
+				if(brk)
+					break;
+				mvaddch(i, col++, c);
+				windx = 0;
+			}
+			else
+				word_arr[windx++] = c;
+                }
+        }
+	refresh();
+	return;
+}
+
+
+void print_line(win w, int line_no, TrieNode *keyword) {
+	line *lne;
+        int h_indx;
+        char word_arr[100];
+
+	// for keyword coloring
+	int windx = 0;
+	char comment = 0;
+	char color = WHITE;
+
+	h_indx = head_index(w, line_no);
+
+	lne = &((w.head)[h_indx].line);
+	char c = 1;
+	int indx = 0;
+
+	if(lne->curr_line[0] == MAX_CHAR) {
+		mvaddch(line_no, 0, TILDE);
+		refresh();
+		return;
+	}
+
+	// to clear previously written line from screen
+	move(line_no, 0);
+	clrtoeol();
+	int col = 0;
+
+	int brk = 0;
+	while(1) {
+		if(lne->gap_size != 0 && indx == lne->gap_left)
+			indx = lne->gap_right + 1;
+		if(indx == MAX_CHAR_IN_SUBLINE) {
+			if(lne->rem_line == NULL) {
+				brk = 1;
+				goto LABEL;
+			}
+			lne = lne->rem_line;
+			indx = 0;
+			continue;
+		}
+
+		c = lne->curr_line[indx++];
+		if(c == '/' && comment == 0)
+			comment = '/';
+		else if(c == '/' && comment == '/') {
+			comment = 1;
+			attron(COLOR_PAIR(COMMENT));
+			mvaddch(line_no, col++, '/');
+			attroff(COLOR_PAIR(COMMENT));
+		}
+
+	    LABEL:
+		if(comment == 1) {
+			if(brk)
+				break;
+			attron(COLOR_PAIR(COMMENT));
+			mvaddch(line_no, col++, c);
+			attroff(COLOR_PAIR(COMMENT));
+		}        		
+		else if(c == '#' || c == '<' || c == ' ' || c == '(' || c == ';' || brk) {
+			word_arr[windx++] = '\0';
+			if(! search(keyword, word_arr, &color))
+				color = WHITE;
+
+			attron(COLOR_PAIR(color));
+			for(int k = 0; word_arr[k] != '\0'; k++)
+				mvaddch(line_no, col++, word_arr[k]);
+			attroff(COLOR_PAIR(color));
+
+			if(brk)
+				break;
+			mvaddch(line_no, col++, c);
+			windx = 0;
+		}
+		else
+			word_arr[windx++] = c;
+	}
+	refresh();
+	return;
+}
+
+
+// for print output on terminal, for debugging
+void print(win w) {
+        line *lne;
+        int h_indx;
+	int a = 0;
+        for(int i = 0; i < w.tot_lines; i++) {
+                h_indx = i;
+                // circular array
+                if(h_indx + w.head_indx >= w.tot_lines)
+                        h_indx = h_indx - w.tot_lines;
+
+                lne = &((w.head)[h_indx].line);
+                char c = 1;
+                int indx = 0;
+
+                if(lne->curr_line[0] == MAX_CHAR)
+                        return;
+
+		while(1) {
+                        if(lne->gap_size != 0 && indx == lne->gap_left)
+                                indx = lne->gap_right + 1;
+			if(indx == MAX_CHAR_IN_SUBLINE) {
+                                if(lne->rem_line == NULL) {
+                                        printf("\n");
+                                        break;
+                                }
+                                lne = lne->rem_line;
+                                indx = 0;
+				continue;
+                        }
+                        c = lne->curr_line[indx++];
+			printf("%c", c);
+		}
+        }
+        return;
+}
+
+

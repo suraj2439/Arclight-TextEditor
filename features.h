@@ -15,7 +15,7 @@
 #define DBLUE		21
 #define LBLUE		39
 #define COMMENT		44
-#define CB_X		34	
+#define CB_X		35	
 #define CB_Y		50
 #define TOT_SHORTCUT_KEYS	9
 
@@ -42,6 +42,8 @@ void print_cbAccept();
 void print_cbSuccess(char* key);
 
 void print_cbNotFound(char *key);
+
+void print_ReadOnly();
 
 void check_bracket(int *ch, char *start, char *end);
 

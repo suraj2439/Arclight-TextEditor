@@ -10,3 +10,11 @@ int swap(int *x, int *y) {
     *y = tmp;
     return;
 }
+
+// Structure defined for each node
+struct node {
+    int value;
+    struct node* left;
+    struct node* right;
+};
+

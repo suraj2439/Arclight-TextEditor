@@ -20,9 +20,9 @@ TrieNode* init_keywords() {
                      "signed", "unsigned", "void", "float", "short"};
         char grp2[][8] = {"register", "extern", "static", "volatile", "const"};
 
-        char grp3[][8] = {"typedef", "struct", "enum", "union"};
+        char grp3[][8] = {"typedef", "struct", "enum", "union", "scanf", "printf"};
 
-        char grp4[][8] = {"continue", "break", "return", "sizeof"};
+        char grp4[][8] = {"continue", "break", "return", "sizeof", "include"};
 
         char grp5[][8] = {"for", "while", "do", "goto"};
 
@@ -132,6 +132,16 @@ void print_cbNotFound(char *key) {
 	getch();
         move(CB_X, CB_Y);
         clrtoeol();
+        return;
+
+}
+
+void print_ReadOnly() {
+        move(CB_X, CB_Y);
+        clrtoeol();
+        refresh();
+        mvprintw(CB_X, CB_Y, "%s", "Read Only File, Cannot write on this file...");
+        refresh();
         return;
 
 }
