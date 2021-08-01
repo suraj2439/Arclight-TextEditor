@@ -11,6 +11,9 @@ For ‘C’ programmers:
 Many shortcut keys for commonly used syntax.
 Codebase facility to store code in codebase permanently using key and easily access it later .
 
+## Demo:
+![Screenshot from 2021-08-01 18-31-16](https://user-images.githubusercontent.com/61696982/127771916-cecde79a-9f01-413b-a5c7-446e87ebb6e3.png)
+
 
 ## Data Structures Used:
 Circular Array
