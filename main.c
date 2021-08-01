@@ -98,7 +98,7 @@ int main(int argc, char *argv[]) {
 	refresh();
 
 	int cnt = 0;
-	while(1) {
+	while(true) {
 		// take user input
 		ch = getch();
 		cnt++;
@@ -180,6 +180,7 @@ int main(int argc, char *argv[]) {
         	                        win_col++;
                 	        break;
 
+			
 			// down arrow key
 			case KEY_DOWN:
 				for(int k = 0; k < down; k++) {
@@ -198,7 +199,7 @@ int main(int argc, char *argv[]) {
 						win_line--;
 						line_no--;
 					}
-						
+
                 	        }
 				// if down arrow at bottom of window, load next line
         	                else {
@@ -209,10 +210,11 @@ int main(int argc, char *argv[]) {
                         	                line_no++;
 
                 	                	int h_indx = head_index(window_1, win_line);
+						// adjust column number
 						// adjust column no
         	                        	if(win_col > (window_1.head)[h_indx].line_size)
 	                                        	win_col = (window_1.head)[h_indx].line_size;
-						
+
 						// store info in stack for undo function
                                 		store_info(&st, 0, ch, LOAD_NEXT_LINE, win_line, win_col);
 					}

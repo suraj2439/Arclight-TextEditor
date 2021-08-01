@@ -1,0 +1,354 @@
+                    else {
+                    }
+                                        store_info(&st, pos_changed, ch, INSERT_NEW_LINE, win_line, win_col);
+                                &win_col, fd_store_prev, fd_store_next, fd_main);
+                                        insert_new_line_at_pos(&window_1, &win_line, 
+                        line_no++;
+                    if(shortcut_key[sk_index][i] == '\n') {
+
+                    int h_indx = head_index(window_1, win_line);
+                for(int i = 0; shortcut_key[sk_index][i] != '\0'; i++) {
+                // which is to be inserted at current position
+                // shortcut_key[sk_index] will give text 
+                                        goto READ_ONLY;
+                if(read_only)
+            case SHORTCUT_KEY: {
+            // shortcut keys to insert common 'c' syntax
+
+            }    
+                                break;
+                    win_col = (window_1.head)[h_indx].line_size;
+                if(win_col > (window_1.head)[h_indx].line_size)
+                int h_indx = head_index(window_1, win_line);
+
+                win_line = window_1.tot_lines-1;
+                line_no += window_1.tot_lines-1 - win_line;
+                pos_changed = 1;
+                        case CTRL('k'): {
+            // move to bottom line of window
+            }
+                                break;
+                                        win_col = (window_1.head)[h_indx].line_size;
+                                if(win_col > (window_1.head)[h_indx].line_size)
+                                int h_indx = head_index(window_1, win_line);
+
+                                win_line = 0;
+                line_no -= win_line;
+                pos_changed = 1;
+            case CTRL('o'): {
+            // move to top line of window
+                                break;
+                                win_col = (window_1.head)[head_index(window_1, win_line)].line_size;
+                pos_changed = 1;
+            case CTRL('l'):
+            // move to end of line
+                break;
+                win_col = 0;
+                pos_changed = 1;
+            case CTRL('h'):
+            // move to start of line
+
+            }
+                break;
+                print_line(window_1, win_line, keyword);
+                
+                insert_at_pos(&((window_1.head)[h_indx].line), (window_1.head)[h_indx].line_size++, ';');
+                int h_indx = head_index(window_1, win_line);
+            case CTRL(';'): {
+            // insert ; at end
+        
+            }
+                break;
+                print_line(window_1, win_line, keyword);
+
+                                pos_changed = 0;
+                win_col--;
+                                store_info(&st, pos_changed, ch, INSERT_CHAR, win_line, win_col);
+                insert_at_pos(&((window_1.head)[h_indx].line), win_col++, end_bracket);
+                                insert_at_pos(&((window_1.head)[h_indx].line), win_col++, start_bracket);
+                                (window_1.head)[h_indx].line_size += 2;
+                int h_indx = head_index(window_1, win_line);
+                // insert bracket with pair
+                                        goto READ_ONLY;
+                if(read_only)
+            case BRACKET: {
+            // insert bracket with pair
+
+            }
+                break;
+                print_line(window_1, win_line, keyword);
+                                }
+                                                pos_changed = 0;
+                                        if(pos_changed)
+                                        store_info(&st, pos_changed, ch, INSERT_CHAR, win_line, win_col);
+                                        insert_at_pos(&((window_1.head)[h_indx].line), win_col++, ' ');
+                                        (window_1.head)[h_indx].line_size++;
+                                for(int i = 0; i < TAB_SPACE; i++) {
+                int h_indx = head_index(window_1, win_line);
+                                        goto READ_ONLY;
+                if(read_only)
+            case '\t': {
+            
+                            break;
+                print_page(window_1, keyword);
+                // print updated page on screen
+                            pos_changed = 0;
+                            store_info(&st, pos_changed, ch, INSERT_NEW_LINE, win_line, win_col);
+                            insert_new_line_at_pos(&window_1, &win_line, &win_col, fd_store_prev, fd_store_next, fd_main);
+                            line_no++;
+                    goto READ_ONLY;
+                if(read_only)
+            case '\n':
+            // enter key
+
+                    }
+                            break;
+                    print_line(window_1, win_line, keyword);
+                else
+                    print_page(window_1, keyword);
+                if(operation == DEL_LINE)
+
+                            pos_changed = 0;
+                            store_info(&st, pos_changed, data, operation, win_line, win_col);
+                            char data = del_from_pos(&window_1, &win_line, &win_col, fd_store_prev, fd_store_next, fd_main);
+                            }
+                                    line_no--;
+                                    operation = DEL_LINE;
+                            if(win_col == 0) {
+                            char operation = DEL_CHAR;
+
+                                    continue;
+                            if(line_no == 0 && win_col == 0)
+                            // at start of file, do nothing
+                    goto READ_ONLY;
+                if(read_only)
+            case KEY_BACKSPACE: {
+
+                            break;
+                }
+                            }
+                    print_page(window_1, keyword);
+                    // print updated page on screen
+                    }
+                        store_info(&st, 0, ch, LOAD_PREV_LINE, win_line, win_col);
+                        // store info in stack
+
+                                                win_col = (window_1.head)[h_indx].line_size;
+                                        if(win_col > (window_1.head)[h_indx].line_size)
+                                        int h_indx = head_index(window_1, win_line);
+
+                                            line_no--;
+                        // update line no and column no
+                                    if(check == SUCCESS) {
+                    // if prev line successfully loaded
+                                    int check = load_prev_line(&window_1, fd_store_prev, fd_store_next);
+                            else {
+                // if up arrow pressed at top of window, load prev line
+                            }
+
+                                            win_col = (window_1.head)[h_indx].line_size;
+                                    if(win_col > (window_1.head)[h_indx].line_size)
+                                    int h_indx = head_index(window_1, win_line);
+                    // adjust column no
+                    
+                                    line_no--;
+                                    win_line--;
+                    // decrease line no
+                            if(win_line > 0) {
+                // if curr line not first
+                pos_changed = 1;
+                for(int k = 0; k < up; k++) {
+            case KEY_UP:
+            // up arrow key
+
+                            break;
+                }
+                            }
+                    print_page(window_1, keyword);
+                    // print updated page on screen
+                    }
+                                        store_info(&st, 0, ch, LOAD_NEXT_LINE, win_line, win_col);
+                        // store info in stack for undo function
+
+                                                win_col = (window_1.head)[h_indx].line_size;
+                                        if(win_col > (window_1.head)[h_indx].line_size)
+                        // adjust column no
+                        // adjust column number
+                                        int h_indx = head_index(window_1, win_line);
+
+                                            line_no++;
+                                    if(check == SUCCESS) {
+                    // if next line successfully loaded
+                                    int check = load_next_line(&window_1, fd_store_prev, fd_store_next, fd_main);
+                    // load next line
+                            else {
+                // if down arrow at bottom of window, load next line
+                            }
+
+                    }
+                        line_no--;
+                        win_line--;
+                    if((window_1.head)[h_indx].line.curr_line[0] == MAX_CHAR) {
+
+                                               win_col = (window_1.head)[h_indx].line_size;
+                                       if(win_col > (window_1.head)[h_indx].line_size)
+                    // update column no
+                                    int h_indx = head_index(window_1, win_line);
+
+                                    line_no++;
+                                    win_line++;
+                    // increase line no
+                            if(win_line < window_1.tot_lines - 1) {
+                pos_changed = 1;
+                for(int k = 0; k < down; k++) {
+            case KEY_DOWN:
+            // down arrow key
+            
+
+                            break;
+                                    win_col++;
+                            if(win_col < (window_1.head)[head_index(window_1, win_line)].line_size)
+                pos_changed = 1;
+                // increase column no if cursor not at end of line
+            case KEY_RIGHT:
+            // right arrow key
+
+                                break;
+                                    win_col--;
+                            if(win_col)
+                pos_changed = 1;
+                // decrese column no if not 0
+            case KEY_LEFT:
+            // left arrow key
+
+                break;
+                print_page(window_1, keyword);
+                undo(&st, &window_1, &line_no, &win_line, &win_col, fd_store_prev, fd_store_next, fd_main);
+            case KEY_F(4):
+            // undo function
+
+                goto SAVE;
+            case CTRL('y'):
+            // save and quit
+
+                return 0;
+                endwin();
+                // end ncurses interface
+
+                        remove(next_file);
+                        remove(prev_file);
+                            remove(argv[1]);
+                if(new_file)
+                // remove all extra files
+
+                        fclose(fd_cb_data);
+                fclose(fd_cb_key);
+                        fclose(fd_store_next);
+                        fclose(fd_store_prev);
+                        fclose(fd_main);
+                // close all files
+            case 'q':
+            // quit without save
+        switch(ch) {
+        
+        }
+                win_col = (window_1.head)[h_indx].line_size;
+            if(win_col > (window_1.head)[h_indx].line_size)
+            int h_indx = head_index(window_1, win_line);
+
+            win_line = 0;
+            line_no -= win_line;
+
+            up = window_1.tot_lines-1;
+            ch = KEY_UP;
+        else if(ch == KEY_PPAGE) {
+        }
+                win_col = (window_1.head)[h_indx].line_size;
+            if(win_col > (window_1.head)[h_indx].line_size)
+            int h_indx = head_index(window_1, win_line);
+
+                        win_line = window_1.tot_lines-1;
+            line_no += window_1.tot_lines-1 - win_line;
+
+            down = window_1.tot_lines-1;
+            ch = KEY_DOWN;
+        if(ch == KEY_NPAGE) { 
+        int up = 1, down = 1;
+
+        check_bracket(&ch, &start_bracket, &end_bracket);
+        // check if input key is bracket
+        int sk_index = shortcut_key_indx(&ch, &move_left);
+        // check if input is any shortcut key
+        char start_bracket, end_bracket;
+        int move_left = 0;
+
+        cnt++;
+        ch = getch();
+        // take user input
+    while(true) {
+    int cnt = 0;
+
+    refresh();
+    move(line_no, win_col);
+    // move cursor
+    print_loc(line_no, win_col);
+    // print co ordinates
+        print_ReadOnly();
+    if(read_only)
+    print_page(window_1, keyword);
+    // print whole page at start
+
+    int pos_changed = 0;
+    int win_line = 0, win_col = 0, line_no = 0;
+    int ch;
+
+    char **shortcut_key = init_shortcut_keys();
+    // init shortcut keys
+
+    TrieNode *keyword = init_keywords();
+    init_colors();
+    // init colors for syntax hilighting
+
+        keypad(stdscr, true);
+        noecho();
+        initscr();
+    // curses interface 
+    
+
+        fd_store_next = fopen(next_file, "w+");    
+        fd_store_prev = fopen(prev_file, "w+");
+    // open tmp files
+
+    strcat(strcat(next_file, argv[1]), "_next.tmp");
+    strcat(strcat(prev_file, argv[1]), "_prev.tmp");
+    // generate tmp filenames, filename_prev.tmp and filename_next.tmp
+    char next_file[50] = ".";
+    char prev_file[50] = ".";
+
+        fd_main = load_file(&window_1, argv[1]);
+    else
+    // else load file into data structure
+        fd_main = fopen(argv[1], "w+");
+    if(new_file)
+    // if file not present create new with 'read write' permission
+    
+                read_only = 1;
+    if(! (perm.st_mode & S_IWUSR))
+    int read_only = 0;
+    // check whether file has write permission or not
+
+    }
+        return 0;
+        printf("Cannot Open Directory.\n");
+    if(S_ISDIR(perm.st_mode)) {
+    // if file is directory, cannot open
+
+        new_file = 1;
+    if(stat(argv[1], &perm) == -1)
+    struct stat perm;
+    // filename is present or not
+    // check file corresponding to input 
+    int new_file = 0;
+
+
+        TrieNode_c *codebase = init_codebase(fd_cb_key);
