@@ -7,7 +7,7 @@ Can open bigger size text files which cannot be opened by vim, gedit, nano, kate
 GUI using Ncurses library. 
 
 For ‘C’ programmers:
-‘C’ language syntax highlighting.
+## ‘C’ language syntax highlighting.
 Many shortcut keys for commonly used syntax.
 Codebase facility to store code in codebase permanently using key and easily access it later .
 
@@ -152,6 +152,10 @@ This facility can be used for any programming language as well as for normal tex
 Time Complexity: O(n)
 where n = length of key given to search.
 
+### Codebase Demo
+
+
+https://user-images.githubusercontent.com/61696982/127776285-0fa1dee3-5496-4b70-8849-63f6262592eb.mp4
 
 
 
