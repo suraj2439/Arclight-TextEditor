@@ -1,4 +1,4 @@
-# Project: Text Editor
+# Arclight - A text editor
 
 
 ## Overview:
@@ -118,17 +118,19 @@ where n = length of key given to search.
 
 ## Some features for ‘C’ programmer:
 
-Shortcut keys            Insert
-Ctrl + P                printf("%",);
-Ctrl + A                scanf("%", &);
-Ctrl + E                #include <>;
-Ctrl + D                #define 
-Ctrl + N                main loop
-Ctrl + F                for(int i = ; )
-Ctrl + W                while()
-Ctrl + R                return ;
-Ctrl + T                typedef struct {\n \n} ;
-Ctrl + ;                insert ‘;’ semicolon at end of line
+| Shortcut keys | Insert |
+| ------------- | ------------- |
+| Ctrl + P  | printf("%",);  |
+| Ctrl + A  | scanf("%", &)  |
+| Ctrl + E  | #include <>;l  |
+| Ctrl + D  | #define   |
+| Ctrl + N  | main loop  |
+| Ctrl + F  | for(int i = ; )  |
+| Ctrl + W  | while()  |
+| Ctrl + R  | return ;  |
+| Ctrl + T  | typedef struct {\n \n} ;  |
+| Ctrl + ;  | insert ‘;’ semicolon at end of line  |
+
 Cursor will be adjusted at appropriate position.
 Time Complexity: O(1)
 
